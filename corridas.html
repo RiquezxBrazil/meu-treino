@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Corridas | Meu Treino</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b0f0d;
+            color: #f1f5f3;
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        .container {
+            width: min(1100px, 92%);
+            margin: 0 auto;
+            padding: 25px 0 50px;
+        }
+
+        /* HEADER */
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #39d353;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-button {
+            background: #151b18;
+            color: #fff;
+            border: 1px solid #26322c;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .header-button:hover {
+            background: #1d2822;
+            border-color: #39d353;
+        }
+
+        /* TÍTULO */
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: #9ca8a1;
+        }
+
+        /* CARDS */
+
+        .card {
+            background: #111713;
+            border: 1px solid #202a24;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 18px;
+        }
+
+        /* FORM */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            color: #b7c1bb;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #0b0f0d;
+            color: #fff;
+            border: 1px solid #29352e;
+            border-radius: 10px;
+            padding: 12px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #39d353;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* RPE */
+
+        .rpe-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .rpe-button {
+            width: 42px;
+            height: 42px;
+            border-radius: 9px;
+            border: 1px solid #29352e;
+            background: #0b0f0d;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .rpe-button:hover {
+            border-color: #39d353;
+        }
+
+        .rpe-button.active {
+            background: #39d353;
+            color: #061007;
+            border-color: #39d353;
+            font-weight: bold;
+        }
+
+        /* BOTÕES */
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .primary-button {
+            background: #39d353;
+            color: #061007;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .secondary-button {
+            background: #151b18;
+            color: #fff;
+            border: 1px solid #29352e;
+            padding: 13px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* RESUMO */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .summary-box {
+            background: #0b0f0d;
+            border: 1px solid #202a24;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .summary-label {
+            color: #8f9b94;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* HISTÓRICO */
+
+        .run-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .run-item {
+            background: #0b0f0d;
+            border: 1px solid #202a24;
+            border-radius: 12px;
+            padding: 17px;
+        }
+
+        .run-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .run-date {
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .run-type {
+            color: #39d353;
+            font-size: 13px;
+        }
+
+        .run-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .run-stat {
+            background: #111713;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .run-stat span {
+            display: block;
+            color: #7f8a83;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .run-stat strong {
+            font-size: 15px;
+        }
+
+        .run-observation {
+            color: #9ca8a1;
+            font-size: 13px;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        .delete-button {
+            background: transparent;
+            color: #ff6b6b;
+            border: 1px solid #4a2929;
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-button:hover {
+            background: #251414;
+        }
+
+        /* MENSAGENS */
+
+        .message {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            display: block;
+            background: #102615;
+            border: 1px solid #245c2d;
+            color: #8ff39a;
+        }
+
+        .message.error {
+            display: block;
+            background: #291313;
+            border: 1px solid #632626;
+            color: #ff9999;
+        }
+
+        .empty {
+            color: #8f9b94;
+            text-align: center;
+            padding: 25px 10px;
+        }
+
+        .loading {
+            color: #8f9b94;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* RESPONSIVO */
+
+        @media (max-width: 700px) {
+
+            .container {
+                width: 94%;
+                padding-top: 18px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .page-title h1 {
+                font-size: 27px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .run-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .run-top {
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+
+        <div class="logo">
+            Meu <span>Treino</span>
+        </div>
+
+        <div class="header-actions">
+
+            <button class="header-button" id="homeButton">
+                🏠 Início
+            </button>
+
+            <button class="header-button" id="evolutionButton">
+                📈 Evolução
+            </button>
+
+            <button class="header-button" id="logoutButton">
+                Sair
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <div class="page-title">
+
+        <h1>🏃 Corridas</h1>
+
+        <p>
+            Registre seus treinos de corrida e acompanhe sua evolução.
+        </p>
+
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <!-- REGISTRAR CORRIDA -->
+
+    <section class="card">
+
+        <h2>Registrar corrida</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label for="data">
+                    Data
+                </label>
+
+                <input
+                    type="date"
+                    id="data"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="tipo">
+                    Tipo de corrida
+                </label>
+
+                <select id="tipo">
+
+                    <option value="Leve">
+                        Corrida leve
+                    </option>
+
+                    <option value="Intervalado">
+                        Intervalado
+                    </option>
+
+                    <option value="Tempo Run">
+                        Tempo Run
+                    </option>
+
+                    <option value="Fartlek">
+                        Fartlek
+                    </option>
+
+                    <option value="Longão">
+                        Longão
+                    </option>
+
+                    <option value="Regenerativo">
+                        Regenerativo
+                    </option>
+
+                    <option value="Teste">
+                        Teste
+                    </option>
+
+                    <option value="Prova">
+                        Prova
+                    </option>
+
+                    <option value="Outro">
+                        Outro
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="distancia">
+                    Distância (km)
+                </label>
+
+                <input
+                    type="number"
+                    id="distancia"
+                    placeholder="Ex.: 5"
+                    step="0.001"
+                    min="0"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="tempo">
+                    Tempo total
+                </label>
+
+                <input
+                    type="text"
+                    id="tempo"
+                    placeholder="Ex.: 22:46"
+                >
+
+            </div>
+
+
+            <div class="form-group full">
+
+                <label>
+                    RPE — percepção de esforço
+                </label>
+
+                <div class="rpe-container">
+
+                    <button class="rpe-button" data-rpe="1">1</button>
+                    <button class="rpe-button" data-rpe="2">2</button>
+                    <button class="rpe-button" data-rpe="3">3</button>
+                    <button class="rpe-button" data-rpe="4">4</button>
+                    <button class="rpe-button" data-rpe="5">5</button>
+                    <button class="rpe-button" data-rpe="6">6</button>
+                    <button class="rpe-button" data-rpe="7">7</button>
+                    <button class="rpe-button" data-rpe="8">8</button>
+                    <button class="rpe-button" data-rpe="9">9</button>
+                    <button class="rpe-button" data-rpe="10">10</button>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group full">
+
+                <label for="observacoes">
+                    Observações
+                </label>
+
+                <textarea
+                    id="observacoes"
+                    placeholder="Como foi a corrida? Sensações, dores, clima, terreno, estratégia..."
+                ></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                class="primary-button"
+                id="saveButton"
+            >
+                💾 Salvar corrida
+            </button>
+
+            <button
+                class="secondary-button"
+                id="clearButton"
+            >
+                Limpar
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- RESUMO -->
+
+    <section class="card">
+
+        <h2>Resumo</h2>
+
+        <div class="summary-grid">
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Corridas registradas
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="totalRuns"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Distância total
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="totalDistance"
+                >
+                    0 km
+                </div>
+
+            </div>
+
+
+            <div class="summary-box">
+
+                <div class="summary-label">
+                    Melhor 5 km
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="best5k"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HISTÓRICO -->
+
+    <section class="card">
+
+        <h2>Histórico de corridas</h2>
+
+        <div
+            id="runList"
+            class="run-list"
+        >
+
+            <div class="loading">
+                Carregando corridas...
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+    // ============================================================
+    // SUPABASE
+    // ============================================================
+
+    const SUPABASE_URL =
+        "https://uukryfijipouzukeelmg.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
+
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    // ============================================================
+    // ELEMENTOS
+    // ============================================================
+
+    const dataInput =
+        document.getElementById("data");
+
+    const tipoInput =
+        document.getElementById("tipo");
+
+    const distanciaInput =
+        document.getElementById("distancia");
+
+    const tempoInput =
+        document.getElementById("tempo");
+
+    const observacoesInput =
+        document.getElementById("observacoes");
+
+    const saveButton =
+        document.getElementById("saveButton");
+
+    const clearButton =
+        document.getElementById("clearButton");
+
+    const message =
+        document.getElementById("message");
+
+    const runList =
+        document.getElementById("runList");
+
+    const totalRuns =
+        document.getElementById("totalRuns");
+
+    const totalDistance =
+        document.getElementById("totalDistance");
+
+    const best5k =
+        document.getElementById("best5k");
+
+
+    let rpeSelecionado = null;
+
+
+    // ============================================================
+    // DATA DE HOJE
+    // ============================================================
+
+    function dataHoje() {
+
+        const agora = new Date();
+
+        const ano =
+            agora.getFullYear();
+
+        const mes =
+            String(
+                agora.getMonth() + 1
+            ).padStart(2, "0");
+
+        const dia =
+            String(
+                agora.getDate()
+            ).padStart(2, "0");
+
+        return `${ano}-${mes}-${dia}`;
+
+    }
+
+
+    dataInput.value =
+        dataHoje();
+
+
+    // ============================================================
+    // RPE
+    // ============================================================
+
+    document
+        .querySelectorAll(".rpe-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    document
+                        .querySelectorAll(".rpe-button")
+                        .forEach(btn => {
+
+                            btn.classList.remove(
+                                "active"
+                            );
+
+                        });
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    rpeSelecionado =
+                        Number(
+                            button.dataset.rpe
+                        );
+
+                }
+            );
+
+        });
+
+
+    // ============================================================
+    // MENSAGEM
+    // ============================================================
+
+    function mostrarMensagem(
+        texto,
+        tipo
+    ) {
+
+        message.textContent =
+            texto;
+
+        message.className =
+            "message " + tipo;
+
+
+        setTimeout(() => {
+
+            message.className =
+                "message";
+
+        }, 4000);
+
+    }
+
+
+    // ============================================================
+    // CONVERTER TEMPO
+    // ============================================================
+
+    function tempoParaSegundos(
+        valor
+    ) {
+
+        if (!valor) {
+            return null;
+        }
+
+
+        valor =
+            valor.trim();
+
+
+        const partes =
+            valor.split(":");
+
+
+        if (partes.length === 2) {
+
+            const minutos =
+                Number(partes[0]);
+
+            const segundos =
+                Number(partes[1]);
+
+
+            if (
+                !Number.isFinite(minutos) ||
+                !Number.isFinite(segundos) ||
+                segundos >= 60 ||
+                minutos < 0 ||
+                segundos < 0
+            ) {
+
+                return null;
+
+            }
+
+
+            return (
+                minutos * 60 +
+                segundos
+            );
+
+        }
+
+
+        if (partes.length === 3) {
+
+            const horas =
+                Number(partes[0]);
+
+            const minutos =
+                Number(partes[1]);
+
+            const segundos =
+                Number(partes[2]);
+
+
+            if (
+                !Number.isFinite(horas) ||
+                !Number.isFinite(minutos) ||
+                !Number.isFinite(segundos) ||
+                minutos >= 60 ||
+                segundos >= 60 ||
+                horas < 0 ||
+                minutos < 0 ||
+                segundos < 0
+            ) {
+
+                return null;
+
+            }
+
+
+            return (
+                horas * 3600 +
+                minutos * 60 +
+                segundos
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // ============================================================
+    // FORMATAR TEMPO
+    // ============================================================
+
+    function formatarTempo(
+        segundos
+    ) {
+
+        if (
+            segundos === null ||
+            segundos === undefined
+        ) {
+
+            return "—";
+
+        }
+
+
+        segundos =
+            Math.round(segundos);
+
+
+        const horas =
+            Math.floor(
+                segundos / 3600
+            );
+
+
+        const minutos =
+            Math.floor(
+                (segundos % 3600) / 60
+            );
+
+
+        const seg =
+            segundos % 60;
+
+
+        if (horas > 0) {
+
+            return (
+                String(horas).padStart(2, "0") +
+                ":" +
+                String(minutos).padStart(2, "0") +
+                ":" +
+                String(seg).padStart(2, "0")
+            );
+
+        }
+
+
+        return (
+            String(minutos).padStart(2, "0") +
+            ":" +
+            String(seg).padStart(2, "0")
+        );
+
+    }
+
+
+    // ============================================================
+    // CALCULAR RITMO
+    // ============================================================
+
+    function calcularRitmo(
+        distancia,
+        tempoSegundos
+    ) {
+
+        if (
+            !distancia ||
+            !tempoSegundos ||
+            distancia <= 0
+        ) {
+
+            return null;
+
+        }
+
+
+        return Math.round(
+            tempoSegundos / distancia
+        );
+
+    }
+
+
+    // ============================================================
+    // FORMATAR RITMO
+    // ============================================================
+
+    function formatarRitmo(
+        segundosPorKm
+    ) {
+
+        if (
+            segundosPorKm === null ||
+            segundosPorKm === undefined
+        ) {
+
+            return "—";
+
+        }
+
+
+        const minutos =
+            Math.floor(
+                segundosPorKm / 60
+            );
+
+
+        const segundos =
+            Math.round(
+                segundosPorKm % 60
+            );
+
+
+        return (
+            minutos +
+            ":" +
+            String(segundos).padStart(2, "0") +
+            "/km"
+        );
+
+    }
+
+
+    // ============================================================
+    // FORMATAR DATA
+    // ============================================================
+
+    function formatarData(
+        data
+    ) {
+
+        if (!data) {
+            return "—";
+        }
+
+
+        const partes =
+            data.split("-");
+
+
+        if (partes.length !== 3) {
+            return data;
+        }
+
+
+        return (
+            partes[2] +
+            "/" +
+            partes[1] +
+            "/" +
+            partes[0]
+        );
+
+    }
+
+
+    // ============================================================
+    // SALVAR CORRIDA
+    // ============================================================
+
+    async function salvarCorrida() {
+
+        saveButton.disabled = true;
+
+        saveButton.textContent =
+            "Salvando...";
+
+
+        try {
+
+            const {
+                data: {
+                    user
+                }
+            } =
+                await supabaseClient.auth.getUser();
+
+
+            if (!user) {
+
+                mostrarMensagem(
+                    "Você precisa estar logado para salvar uma corrida.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const data =
+                dataInput.value;
+
+
+            const tipo =
+                tipoInput.value;
+
+
+            const distancia =
+                Number(
+                    distanciaInput.value
+                );
+
+
+            const tempoSegundos =
+                tempoParaSegundos(
+                    tempoInput.value
+                );
+
+
+            const observacoes =
+                observacoesInput.value.trim();
+
+
+            if (!data) {
+
+                mostrarMensagem(
+                    "Informe a data da corrida.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                !distancia ||
+                distancia <= 0
+            ) {
+
+                mostrarMensagem(
+                    "Informe uma distância válida.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                tempoSegundos === null
+            ) {
+
+                mostrarMensagem(
+                    "Informe o tempo no formato 22:46 ou 1:05:30.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const ritmoSegundosKm =
+                calcularRitmo(
+                    distancia,
+                    tempoSegundos
+                );
+
+
+            const corrida = {
+
+                user_id:
+                    user.id,
+
+                data:
+                    data,
+
+                tipo:
+                    tipo,
+
+                distancia_km:
+                    distancia,
+
+                tempo_segundos:
+                    tempoSegundos,
+
+                ritmo_segundos_km:
+                    ritmoSegundosKm,
+
+                rpe:
+                    rpeSelecionado,
+
+                observacoes:
+                    observacoes || null
+
+            };
+
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("Corridas")
+                    .insert(corrida);
+
+
+            if (error) {
+
+                console.error(error);
+
+                throw error;
+
+            }
+
+
+            mostrarMensagem(
+                "✓ Corrida salva na nuvem!",
+                "success"
+            );
+
+
+            limparFormulario();
+
+            await carregarCorridas();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+                "Não foi possível salvar a corrida.",
+                "error"
+            );
+
+        } finally {
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                "💾 Salvar corrida";
+
+        }
+
+    }
+
+
+    // ============================================================
+    // CARREGAR CORRIDAS
+    // ============================================================
+
+    async function carregarCorridas() {
+
+        runList.innerHTML =
+            `
+            <div class="loading">
+                Carregando corridas...
+            </div>
+            `;
+
+
+        try {
+
+            const {
+                data: {
+                    user
+                }
+            } =
+                await supabaseClient.auth.getUser();
+
+
+            if (!user) {
+
+                runList.innerHTML =
+                    `
+                    <div class="empty">
+                        Faça login para visualizar suas corridas.
+                    </div>
+                    `;
+
+                return;
+
+            }
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("Corridas")
+                    .select("*")
+                    .eq(
+                        "user_id",
+                        user.id
+                    )
+                    .order(
+                        "data",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) {
+
+                console.error(error);
+
+                throw error;
+
+            }
+
+
+            atualizarResumo(
+                data || []
+            );
+
+
+            renderizarCorridas(
+                data || []
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            runList.innerHTML =
+                `
+                <div class="empty">
+                    Não foi possível carregar suas corridas.
+                </div>
+                `;
+
+        }
+
+    }
+
+
+    // ============================================================
+    // RENDERIZAR CORRIDAS
+    // ============================================================
+
+    function renderizarCorridas(
+        corridas
+    ) {
+
+        if (!corridas.length) {
+
+            runList.innerHTML =
+                `
+                <div class="empty">
+                    Nenhuma corrida registrada ainda.
+                    <br><br>
+                    Registre sua primeira corrida acima.
+                </div>
+                `;
+
+            return;
+
+        }
+
+
+        runList.innerHTML = "";
+
+
+        corridas.forEach(
+            corrida => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "run-item";
+
+
+                const distancia =
+                    Number(
+                        corrida.distancia_km
+                    );
+
+
+                const tempo =
+                    formatarTempo(
+                        corrida.tempo_segundos
+                    );
+
+
+                const ritmo =
+                    formatarRitmo(
+                        corrida.ritmo_segundos_km
+                    );
+
+
+                const rpe =
+                    corrida.rpe !== null &&
+                    corrida.rpe !== undefined
+                        ? corrida.rpe
+                        : "—";
+
+
+                item.innerHTML =
+                    `
+
+                    <div class="run-top">
+
+                        <div>
+
+                            <div class="run-date">
+                                ${formatarData(
+                                    corrida.data
+                                )}
+                            </div>
+
+                            <div class="run-type">
+                                ${escapeHtml(
+                                    corrida.tipo ||
+                                    "Corrida"
+                                )}
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="delete-button"
+                            data-id="${corrida.id}"
+                        >
+                            Excluir
+                        </button>
+
+                    </div>
+
+
+                    <div class="run-stats">
+
+                        <div class="run-stat">
+
+                            <span>
+                                Distância
+                            </span>
+
+                            <strong>
+                                ${distancia.toFixed(2)} km
+                            </strong>
+
+                        </div>
+
+
+                        <div class="run-stat">
+
+                            <span>
+                                Tempo
+                            </span>
+
+                            <strong>
+                                ${tempo}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="run-stat">
+
+                            <span>
+                                Ritmo
+                            </span>
+
+                            <strong>
+                                ${ritmo}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="run-stat">
+
+                            <span>
+                                RPE
+                            </span>
+
+                            <strong>
+                                ${rpe}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        corrida.observacoes
+                            ?
+                            `
+                            <div class="run-observation">
+                                📝 ${escapeHtml(
+                                    corrida.observacoes
+                                )}
+                            </div>
+                            `
+                            :
+                            ""
+                    }
+
+                    `;
+
+
+                item
+                    .querySelector(
+                        ".delete-button"
+                    )
+                    .addEventListener(
+                        "click",
+                        () =>
+                            excluirCorrida(
+                                corrida.id
+                            )
+                    );
+
+
+                runList.appendChild(
+                    item
+                );
+
+            }
+        );
+
+    }
+
+
+    // ============================================================
+    // RESUMO
+    // ============================================================
+
+    function atualizarResumo(
+        corridas
+    ) {
+
+        totalRuns.textContent =
+            corridas.length;
+
+
+        const distanciaTotal =
+            corridas.reduce(
+                (
+                    total,
+                    corrida
+                ) =>
+                    total +
+                    Number(
+                        corrida.distancia_km ||
+                        0
+                    ),
+                0
+            );
+
+
+        totalDistance.textContent =
+            distanciaTotal.toFixed(1) +
+            " km";
+
+
+        const corridas5k =
+            corridas.filter(
+                corrida => {
+
+                    const distancia =
+                        Number(
+                            corrida.distancia_km
+                        );
+
+
+                    return (
+                        distancia >= 4.9 &&
+                        distancia <= 5.1 &&
+                        corrida.tempo_segundos
+                    );
+
+                }
+            );
+
+
+        if (!corridas5k.length) {
+
+            best5k.textContent =
+                "—";
+
+            return;
+
+        }
+
+
+        const melhor =
+            corridas5k.reduce(
+                (
+                    melhorAtual,
+                    corrida
+                ) => {
+
+                    if (
+                        !melhorAtual ||
+                        corrida.tempo_segundos <
+                        melhorAtual.tempo_segundos
+                    ) {
+
+                        return corrida;
+
+                    }
+
+
+                    return melhorAtual;
+
+                },
+                null
+            );
+
+
+        best5k.textContent =
+            formatarTempo(
+                melhor.tempo_segundos
+            );
+
+    }
+
+
+    // ============================================================
+    // EXCLUIR CORRIDA
+    // ============================================================
+
+    async function excluirCorrida(
+        id
+    ) {
+
+        const confirmar =
+            confirm(
+                "Tem certeza que deseja excluir esta corrida?"
+            );
+
+
+        if (!confirmar) {
+            return;
+        }
+
+
+        try {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("Corridas")
+                    .delete()
+                    .eq(
+                        "id",
+                        id
+                    );
+
+
+            if (error) {
+
+                console.error(error);
+
+                throw error;
+
+            }
+
+
+            mostrarMensagem(
+                "Corrida excluída.",
+                "success"
+            );
+
+
+            await carregarCorridas();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+                "Não foi possível excluir a corrida.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+    // ============================================================
+    // LIMPAR FORMULÁRIO
+    // ============================================================
+
+    function limparFormulario() {
+
+        dataInput.value =
+            dataHoje();
+
+
+        tipoInput.value =
+            "Leve";
+
+
+        distanciaInput.value =
+            "";
+
+
+        tempoInput.value =
+            "";
+
+
+        observacoesInput.value =
+            "";
+
+
+        rpeSelecionado =
+            null;
+
+
+        document
+            .querySelectorAll(
+                ".rpe-button"
+            )
+            .forEach(
+                button =>
+                    button.classList.remove(
+                        "active"
+                    )
+            );
+
+    }
+
+
+    // ============================================================
+    // ESCAPAR HTML
+    // ============================================================
+
+    function escapeHtml(
+        texto
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.textContent =
+            texto;
+
+
+        return div.innerHTML;
+
+    }
+
+
+    // ============================================================
+    // NAVEGAÇÃO
+    // ============================================================
+
+    document
+        .getElementById(
+            "homeButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "index.html";
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "evolutionButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "evolucao.html";
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "logoutButton"
+        )
+        .addEventListener(
+            "click",
+            async () => {
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+
+                window.location.href =
+                    "index.html";
+
+            }
+        );
+
+
+    saveButton.addEventListener(
+        "click",
+        salvarCorrida
+    );
+
+
+    clearButton.addEventListener(
+        "click",
+        limparFormulario
+    );
+
+
+    // ============================================================
+    // INICIAR
+    // ============================================================
+
+    async function iniciar() {
+
+        await carregarCorridas();
+
+    }
+
+
+    iniciar();
+
+</script>
+
+</body>
+</html>

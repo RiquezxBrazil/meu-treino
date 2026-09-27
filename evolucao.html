@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolução | Meu Treino</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+    --bg:#0d1117;
+    --panel:#151b23;
+    --panel2:#1b222c;
+    --border:#29323d;
+    --text:#f1f5f9;
+    --muted:#8d98a6;
+    --green:#39d98a;
+    --green2:#1fa968;
+    --blue:#4da3ff;
+    --purple:#a875ff;
+    --orange:#ff9f43;
+    --red:#ff5d6c;
+    --yellow:#ffd166;
+    --cyan:#36d9ff;
+    --shadow:0 15px 40px rgba(0,0,0,.28);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:
+        radial-gradient(circle at 10% 0%,rgba(57,217,138,.08),transparent 30%),
+        radial-gradient(circle at 90% 10%,rgba(77,163,255,.06),transparent 28%),
+        var(--bg);
+    color:var(--text);
+    min-height:100vh;
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.container{
+    width:min(1250px,94%);
+    margin:auto;
+    padding:28px 0 60px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-bottom:25px;
+}
+
+.brand h1{
+    margin:0;
+    font-size:28px;
+}
+
+.brand p{
+    margin:5px 0 0;
+    color:var(--muted);
+}
+
+.top-actions{
+    display:flex;
+    gap:9px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--text);
+    padding:10px 15px;
+    border-radius:11px;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    border-color:#465465;
+}
+
+.btn.green{
+    background:rgba(57,217,138,.12);
+    border-color:rgba(57,217,138,.3);
+    color:var(--green);
+}
+
+.btn.blue{
+    background:rgba(77,163,255,.12);
+    border-color:rgba(77,163,255,.3);
+    color:var(--blue);
+}
+
+.btn.red{
+    background:rgba(255,93,108,.1);
+    border-color:rgba(255,93,108,.25);
+    color:var(--red);
+}
+
+.section{
+    margin-top:24px;
+}
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:15px;
+    margin-bottom:12px;
+}
+
+.section-title h2{
+    margin:0;
+    font-size:21px;
+}
+
+.section-title span{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.grid{
+    display:grid;
+    gap:14px;
+}
+
+.cards-4{
+    grid-template-columns:repeat(4,1fr);
+}
+
+.cards-3{
+    grid-template-columns:repeat(3,1fr);
+}
+
+.card{
+    background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.01)),var(--panel);
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:18px;
+    box-shadow:var(--shadow);
+}
+
+.stat-card{
+    min-height:125px;
+    position:relative;
+    overflow:hidden;
+}
+
+.stat-card::after{
+    content:"";
+    position:absolute;
+    width:90px;
+    height:90px;
+    right:-35px;
+    bottom:-35px;
+    border-radius:50%;
+    background:currentColor;
+    opacity:.06;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.stat-value{
+    font-size:29px;
+    font-weight:800;
+    margin:9px 0 4px;
+}
+
+.stat-small{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.green-text{color:var(--green)}
+.blue-text{color:var(--blue)}
+.purple-text{color:var(--purple)}
+.orange-text{color:var(--orange)}
+.red-text{color:var(--red)}
+.yellow-text{color:var(--yellow)}
+.cyan-text{color:var(--cyan)}
+
+.record-grid{
+    grid-template-columns:repeat(5,1fr);
+}
+
+.record-card{
+    min-height:140px;
+}
+
+.record-icon{
+    font-size:25px;
+}
+
+.record-name{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:9px;
+}
+
+.record-value{
+    font-size:24px;
+    font-weight:800;
+    margin-top:5px;
+}
+
+.record-detail{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:5px;
+}
+
+.two-col{
+    grid-template-columns:1.2fr .8fr;
+}
+
+.chart-box{
+    height:330px;
+}
+
+.chart-box canvas{
+    width:100%!important;
+    height:100%!important;
+}
+
+.progress{
+    height:9px;
+    border-radius:20px;
+    background:#252d37;
+    overflow:hidden;
+    margin-top:12px;
+}
+
+.progress-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--green2),var(--green));
+    border-radius:20px;
+    transition:width .5s;
+}
+
+.streak-big{
+    font-size:42px;
+    font-weight:900;
+    color:var(--orange);
+}
+
+.streak-line{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.streak-line:last-child{
+    border-bottom:0;
+}
+
+.streak-line span:last-child{
+    font-weight:800;
+}
+
+.calendar-card{
+    padding:18px;
+}
+
+.calendar-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.calendar-head h3{
+    margin:0;
+    text-transform:capitalize;
+}
+
+.calendar-nav{
+    display:flex;
+    gap:7px;
+}
+
+.calendar-nav button{
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:white;
+    width:38px;
+    height:34px;
+    border-radius:9px;
+}
+
+.weekdays,
+.calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+}
+
+.weekdays div{
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    padding-bottom:5px;
+}
+
+.day{
+    min-height:72px;
+    background:#11171f;
+    border:1px solid #202833;
+    border-radius:9px;
+    padding:7px;
+    position:relative;
+    cursor:pointer;
+    transition:.18s;
+}
+
+.day:hover{
+    border-color:#465465;
+    transform:translateY(-1px);
+}
+
+.day.empty{
+    opacity:0;
+    pointer-events:none;
+}
+
+.day-number{
+    font-size:12px;
+    color:#b9c2cc;
+}
+
+.day.today{
+    border:1px solid var(--yellow);
+}
+
+.day.selected{
+    box-shadow:0 0 0 2px rgba(77,163,255,.25);
+}
+
+.dot-row{
+    position:absolute;
+    bottom:7px;
+    left:7px;
+    display:flex;
+    gap:4px;
+}
+
+.dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+}
+
+.dot.training{
+    background:var(--green);
+}
+
+.dot.run{
+    background:var(--blue);
+}
+
+.calendar-legend{
+    display:flex;
+    gap:18px;
+    margin-top:13px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.details-box{
+    margin-top:15px;
+    background:#11171f;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:15px;
+}
+
+.activity-item{
+    padding:12px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.activity-item:last-child{
+    border-bottom:0;
+}
+
+.activity-title{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    border-radius:20px;
+    padding:4px 8px;
+    font-size:11px;
+    font-weight:700;
+}
+
+.badge.green{
+    color:var(--green);
+    background:rgba(57,217,138,.1);
+}
+
+.badge.blue{
+    color:var(--blue);
+    background:rgba(77,163,255,.1);
+}
+
+.history{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.history-item{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--panel);
+    overflow:hidden;
+}
+
+.history-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:15px;
+    cursor:pointer;
+}
+
+.history-main{
+    min-width:0;
+}
+
+.history-title{
+    font-weight:800;
+}
+
+.history-date{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+.history-actions{
+    display:flex;
+    gap:7px;
+    flex-shrink:0;
+}
+
+.small-btn{
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:#dce4ed;
+    padding:7px 9px;
+    border-radius:8px;
+    font-size:12px;
+}
+
+.small-btn:hover{
+    border-color:#526172;
+}
+
+.small-btn.red{
+    color:var(--red);
+}
+
+.history-body{
+    display:none;
+    padding:0 15px 15px;
+    border-top:1px solid var(--border);
+}
+
+.history-item.open .history-body{
+    display:block;
+}
+
+.exercise{
+    padding:13px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.exercise:last-child{
+    border-bottom:0;
+}
+
+.exercise-name{
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.series{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+}
+
+.series-pill{
+    background:#11171f;
+    border:1px solid #28313d;
+    border-radius:8px;
+    padding:6px 8px;
+    color:#cbd5df;
+    font-size:12px;
+}
+
+.run-card{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:15px;
+    background:var(--panel);
+}
+
+.run-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:start;
+}
+
+.run-title{
+    font-size:17px;
+    font-weight:800;
+}
+
+.run-date{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+.run-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-top:14px;
+}
+
+.run-stat{
+    background:#11171f;
+    border-radius:9px;
+    padding:10px;
+}
+
+.run-stat span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.run-stat strong{
+    display:block;
+    margin-top:3px;
+}
+
+.run-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:7px;
+    margin-top:12px;
+}
+
+.empty{
+    text-align:center;
+    color:var(--muted);
+    padding:25px 10px;
+}
+
+.loading{
+    text-align:center;
+    padding:60px;
+    color:var(--muted);
+}
+
+.toast{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    background:#18202a;
+    border:1px solid #34404d;
+    padding:13px 16px;
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    transform:translateY(100px);
+    opacity:0;
+    transition:.25s;
+    z-index:1000;
+}
+
+.toast.show{
+    transform:translateY(0);
+    opacity:1;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:900;
+    backdrop-filter:blur(5px);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    width:min(550px,100%);
+    background:#151b23;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.modal-head h3{
+    margin:0;
+}
+
+.close{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:25px;
+    cursor:pointer;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.field.full{
+    grid-column:1/-1;
+}
+
+.field label{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.field input,
+.field select,
+.field textarea{
+    width:100%;
+    background:#0f151c;
+    border:1px solid var(--border);
+    color:white;
+    padding:10px 11px;
+    border-radius:9px;
+    outline:none;
+}
+
+.field textarea{
+    min-height:90px;
+    resize:vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+    border-color:var(--blue);
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:18px;
+}
+
+@media(max-width:1050px){
+    .cards-4{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .record-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:800px){
+    .two-col{
+        grid-template-columns:1fr;
+    }
+
+    .cards-3{
+        grid-template-columns:1fr;
+    }
+
+    .run-stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:650px){
+    .container{
+        width:92%;
+        padding-top:18px;
+    }
+
+    .topbar{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .cards-4{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .record-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .day{
+        min-height:52px;
+        padding:5px;
+    }
+
+    .dot-row{
+        bottom:5px;
+        left:5px;
+    }
+
+    .history-head{
+        align-items:flex-start;
+    }
+
+    .history-actions{
+        flex-direction:column;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+}
+
+@media(max-width:430px){
+    .cards-4,
+    .record-grid{
+        grid-template-columns:1fr;
+    }
+
+    .weekdays,
+    .calendar{
+        gap:3px;
+    }
+
+    .day{
+        min-height:45px;
+    }
+
+    .day-number{
+        font-size:10px;
+    }
+
+    .calendar-legend{
+        flex-wrap:wrap;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="topbar">
+        <div class="brand">
+            <h1>📈 Evolução</h1>
+            <p>Seu histórico, seus números e seu progresso.</p>
+        </div>
+
+        <div class="top-actions">
+            <button class="btn blue" onclick="window.location.href='index.html'">
+                ← Dashboard
+            </button>
+
+            <button class="btn" onclick="carregarTudo()">
+                ↻ Atualizar
+            </button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        Carregando seus dados...
+    </div>
+
+    <main id="conteudo" style="display:none;">
+
+        <!-- RESUMO -->
+        <section class="section">
+            <div class="section-title">
+                <h2>Resumo geral</h2>
+                <span>Dados registrados na nuvem</span>
+            </div>
+
+            <div class="grid cards-4">
+
+                <div class="card stat-card green-text">
+                    <div class="stat-label">Treinos</div>
+                    <div class="stat-value" id="totalTreinos">0</div>
+                    <div class="stat-small">sessões registradas</div>
+                </div>
+
+                <div class="card stat-card blue-text">
+                    <div class="stat-label">Corridas</div>
+                    <div class="stat-value" id="totalCorridas">0</div>
+                    <div class="stat-small">atividades registradas</div>
+                </div>
+
+                <div class="card stat-card purple-text">
+                    <div class="stat-label">Séries</div>
+                    <div class="stat-value" id="totalSeries">0</div>
+                    <div class="stat-small">séries de musculação</div>
+                </div>
+
+                <div class="card stat-card cyan-text">
+                    <div class="stat-label">Distância</div>
+                    <div class="stat-value" id="totalKm">0 km</div>
+                    <div class="stat-small">corrida acumulada</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RECORDES -->
+        <section class="section">
+            <div class="section-title">
+                <h2>🏆 Recordes pessoais</h2>
+                <span>Calculados automaticamente pelos dados registrados</span>
+            </div>
+
+            <div class="grid record-grid">
+
+                <div class="card record-card green-text">
+                    <div class="record-icon">⚡</div>
+                    <div class="record-name">5 km</div>
+                    <div class="record-value" id="record5k">—</div>
+                    <div class="record-detail" id="record5kDetail">
+                        Nenhuma corrida próxima de 5 km
+                    </div>
+                </div>
+
+                <div class="card record-card blue-text">
+                    <div class="record-icon">🏃</div>
+                    <div class="record-name">10 km</div>
+                    <div class="record-value" id="record10k">—</div>
+                    <div class="record-detail" id="record10kDetail">
+                        Nenhuma corrida próxima de 10 km
+                    </div>
+                </div>
+
+                <div class="card record-card purple-text">
+                    <div class="record-icon">🔥</div>
+                    <div class="record-name">21,1 km</div>
+                    <div class="record-value" id="record21k">—</div>
+                    <div class="record-detail" id="record21kDetail">
+                        Nenhuma corrida próxima de 21,1 km
+                    </div>
+                </div>
+
+                <div class="card record-card orange-text">
+                    <div class="record-icon">🛣️</div>
+                    <div class="record-name">Maior distância</div>
+                    <div class="record-value" id="recordDistance">—</div>
+                    <div class="record-detail" id="recordDistanceDetail">
+                        —
+                    </div>
+                </div>
+
+                <div class="card record-card yellow-text">
+                    <div class="record-icon">🔥</div>
+                    <div class="record-name">Maior sequência</div>
+                    <div class="record-value" id="bestStreakRecord">0 dias</div>
+                    <div class="record-detail">dias consecutivos</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEQUÊNCIA -->
+        <section class="section">
+            <div class="grid two-col">
+
+                <div class="card">
+                    <div class="section-title">
+                        <h2>🔥 Sequência de atividade</h2>
+                        <span>Treinos + corridas</span>
+                    </div>
+
+                    <div class="streak-big" id="currentStreak">0 dias</div>
+
+                    <p style="color:var(--muted);margin-top:3px;">
+                        sequência atual
+                    </p>
+
+                    <div class="progress">
+                        <div class="progress-bar" id="streakProgress" style="width:0%"></div>
+                    </div>
+
+                    <p style="color:var(--muted);font-size:12px;">
+                        A sequência considera dias consecutivos com pelo menos
+                        uma atividade registrada.
+                    </p>
+                </div>
+
+                <div class="card">
+
+                    <div class="streak-line">
+                        <span>Maior sequência</span>
+                        <span id="bestStreak">0 dias</span>
+                    </div>
+
+                    <div class="streak-line">
+                        <span>Dias ativos</span>
+                        <span id="activeDays">0</span>
+                    </div>
+
+                    <div class="streak-line">
+                        <span>Última atividade</span>
+                        <span id="lastActivity">—</span>
+                    </div>
+
+                    <div class="streak-line">
+                        <span>Atividades totais</span>
+                        <span id="totalActivities">0</span>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ESTATÍSTICAS -->
+        <section class="section">
+            <div class="section-title">
+                <h2>📊 Estatísticas</h2>
+                <span>Volume acumulado</span>
+            </div>
+
+            <div class="grid cards-4">
+
+                <div class="card stat-card blue-text">
+                    <div class="stat-label">Tempo correndo</div>
+                    <div class="stat-value" id="totalRunTime">0h</div>
+                    <div class="stat-small">tempo total registrado</div>
+                </div>
+
+                <div class="card stat-card green-text">
+                    <div class="stat-label">Ritmo médio</div>
+                    <div class="stat-value" id="avgPace">—</div>
+                    <div class="stat-small">considerando as corridas com ritmo salvo</div>
+                </div>
+
+                <div class="card stat-card orange-text">
+                    <div class="stat-label">RPE médio</div>
+                    <div class="stat-value" id="avgRpe">—</div>
+                    <div class="stat-small">corridas registradas</div>
+                </div>
+
+                <div class="card stat-card purple-text">
+                    <div class="stat-label">Média por corrida</div>
+                    <div class="stat-value" id="avgDistance">0 km</div>
+                    <div class="stat-small">distância média</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- GRÁFICOS -->
+        <section class="section">
+            <div class="section-title">
+                <h2>📈 Evolução</h2>
+                <span>Visualização das últimas atividades</span>
+            </div>
+
+            <div class="grid two-col">
+
+                <div class="card chart-box">
+                    <h3 style="margin-top:0;">Distância por corrida</h3>
+                    <canvas id="distanceChart"></canvas>
+                </div>
+
+                <div class="card chart-box">
+                    <h3 style="margin-top:0;">Ritmo por corrida</h3>
+                    <canvas id="paceChart"></canvas>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CARGAS -->
+        <section class="section">
+            <div class="section-title">
+                <h2>🏋️ Maiores cargas</h2>
+                <span>Maior carga registrada em cada exercício</span>
+            </div>
+
+            <div class="card">
+                <div id="loadRecords" class="grid cards-3"></div>
+            </div>
+        </section>
+
+        <!-- CALENDÁRIO -->
+        <section class="section">
+            <div class="section-title">
+                <h2>🗓️ Calendário</h2>
+                <span>Toque em um dia para ver os detalhes</span>
+            </div>
+
+            <div class="card calendar-card">
+
+                <div class="calendar-head">
+
+                    <h3 id="calendarTitle"></h3>
+
+                    <div class="calendar-nav">
+                        <button onclick="mudarMes(-1)">‹</button>
+                        <button onclick="irParaHoje()">●</button>
+                        <button onclick="mudarMes(1)">›</button>
+                    </div>
+
+                </div>
+
+                <div class="weekdays">
+                    <div>DOM</div>
+                    <div>SEG</div>
+                    <div>TER</div>
+                    <div>QUA</div>
+                    <div>QUI</div>
+                    <div>SEX</div>
+                    <div>SÁB</div>
+                </div>
+
+                <div id="calendar" class="calendar"></div>
+
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="dot training"></span>
+                        Treino
+                    </div>
+
+                    <div class="legend-item">
+                        <span class="dot run"></span>
+                        Corrida
+                    </div>
+
+                    <div class="legend-item">
+                        <span style="width:8px;height:8px;border:1px solid var(--yellow);border-radius:3px;"></span>
+                        Hoje
+                    </div>
+                </div>
+
+                <div id="calendarDetails"></div>
+
+            </div>
+        </section>
+
+        <!-- HISTÓRICO TREINOS -->
+        <section class="section">
+            <div class="section-title">
+                <h2>🏋️ Histórico de treinos</h2>
+                <span id="trainingHistoryCount"></span>
+            </div>
+
+            <div id="trainingHistory" class="history"></div>
+        </section>
+
+        <!-- HISTÓRICO CORRIDAS -->
+        <section class="section">
+            <div class="section-title">
+                <h2>🏃 Histórico de corridas</h2>
+                <span id="runningHistoryCount"></span>
+            </div>
+
+            <div id="runningHistory" class="history"></div>
+        </section>
+
+    </main>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- MODAL EDITAR CORRIDA -->
+<div id="editModal" class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-head">
+            <h3>✏️ Editar corrida</h3>
+            <button class="close" onclick="fecharModal()">×</button>
+        </div>
+
+        <form id="editRunForm">
+
+            <input type="hidden" id="editRunId">
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Data</label>
+                    <input type="date" id="editDate" required>
+                </div>
+
+                <div class="field">
+                    <label>Tipo</label>
+                    <input type="text" id="editType" placeholder="Ex: Rodagem">
+                </div>
+
+                <div class="field">
+                    <label>Distância (km)</label>
+                    <input type="number" step="0.001" id="editDistance" required>
+                </div>
+
+                <div class="field">
+                    <label>Tempo (minutos)</label>
+                    <input type="number" step="0.01" id="editTime">
+                </div>
+
+                <div class="field">
+                    <label>Ritmo (min/km)</label>
+                    <input type="text" id="editPace" placeholder="Ex: 4:45">
+                </div>
+
+                <div class="field">
+                    <label>RPE</label>
+                    <input type="number" min="1" max="10" step="0.1" id="editRpe">
+                </div>
+
+                <div class="field full">
+                    <label>Observações</label>
+                    <textarea id="editNotes"></textarea>
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="fecharModal()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn green">
+                    Salvar alterações
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+    "https://uukryfijipouzukeelmg.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
+
+const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let usuarioAtual = null;
+
+let treinos = [];
+let corridas = [];
+
+let mesAtual = new Date();
+mesAtual.setDate(1);
+
+let charts = {
+    distance: null,
+    pace: null
+};
+
+/* =========================
+   UTILITÁRIOS
+========================= */
+
+function mostrarToast(mensagem){
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = mensagem;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+
+function formatarData(data){
+
+    if(!data) return "—";
+
+    const [ano,mes,dia] = data.split("-");
+
+    return `${dia}/${mes}/${ano}`;
+}
+
+function formatarTempo(segundos){
+
+    if(!segundos || segundos <= 0) return "—";
+
+    const h = Math.floor(segundos / 3600);
+
+    const m = Math.floor(
+        (segundos % 3600) / 60
+    );
+
+    const s = Math.floor(
+        segundos % 60
+    );
+
+    if(h > 0){
+        return `${h}h ${String(m).padStart(2,"0")}min`;
+    }
+
+    return `${m}:${String(s).padStart(2,"0")}`;
+}
+
+function formatarPace(segundos){
+
+    if(!segundos || segundos <= 0) return "—";
+
+    const min = Math.floor(segundos / 60);
+
+    const sec = Math.round(segundos % 60);
+
+    return `${min}:${String(sec).padStart(2,"0")} /km`;
+}
+
+function paceParaSegundos(valor){
+
+    if(!valor) return null;
+
+    if(typeof valor === "number"){
+        return valor;
+    }
+
+    const texto = String(valor).trim();
+
+    if(texto.includes(":")){
+
+        const partes = texto.split(":");
+
+        const min = Number(partes[0]);
+        const seg = Number(partes[1]);
+
+        if(
+            Number.isFinite(min) &&
+            Number.isFinite(seg)
+        ){
+            return min * 60 + seg;
+        }
+    }
+
+    const numero = Number(texto);
+
+    return Number.isFinite(numero) ? numero : null;
+}
+
+function normalizarData(data){
+
+    if(!data) return null;
+
+    return String(data).slice(0,10);
+}
+
+function escapeHtml(texto){
+
+    if(texto === null || texto === undefined){
+        return "";
+    }
+
+    return String(texto)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+async function verificarLogin(){
+
+    const {
+        data,
+        error
+    } = await supabaseClient.auth.getSession();
+
+    if(error){
+        console.error(error);
+        return;
+    }
+
+    if(!data.session){
+
+        window.location.href = "index.html";
+        return;
+    }
+
+    usuarioAtual = data.session.user;
+
+    await carregarTudo();
+}
+
+/* =========================
+   CARREGAMENTO
+========================= */
+
+async function carregarTudo(){
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("conteudo").style.display = "none";
+
+    await Promise.all([
+        carregarTreinos(),
+        carregarCorridas()
+    ]);
+
+    calcularResumo();
+    calcularRecordes();
+    calcularSequencia();
+    calcularEstatisticas();
+    calcularCargas();
+    renderizarGraficos();
+    renderizarCalendario();
+    renderizarHistoricoTreinos();
+    renderizarHistoricoCorridas();
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("conteudo").style.display = "block";
+}
+
+/* =========================
+   TREINOS
+========================= */
+
+async function carregarTreinos(){
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("Treinos")
+        .select(`
+            id,
+            dia,
+            data,
+            horario,
+            rpe,
+            duracao,
+            observacoes,
+            created_at,
+            Exercicios (
+                id,
+                nome,
+                ordem,
+                observacoes,
+                Series (
+                    id,
+                    numero,
+                    repeticoes,
+                    carga,
+                    unidade,
+                    rpe,
+                    observacoes
+                )
+            )
+        `)
+        .eq("user_id", usuarioAtual.id)
+        .order("data", {ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        mostrarToast(
+            "Erro ao carregar treinos."
+        );
+
+        treinos = [];
+        return;
+    }
+
+    treinos = data || [];
+}
+
+/* =========================
+   CORRIDAS
+========================= */
+
+async function carregarCorridas(){
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("Corridas")
+        .select(`
+            id,
+            data,
+            tipo,
+            distancia_km,
+            tempo_segundos,
+            ritmo_segundos_km,
+            rpe,
+            observacoes,
+            created_at
+        `)
+        .eq("user_id", usuarioAtual.id)
+        .order("data", {ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        mostrarToast(
+            "Erro ao carregar corridas."
+        );
+
+        corridas = [];
+        return;
+    }
+
+    corridas = data || [];
+}
+
+/* =========================
+   RESUMO
+========================= */
+
+function calcularResumo(){
+
+    document.getElementById("totalTreinos").textContent =
+        treinos.length;
+
+    document.getElementById("totalCorridas").textContent =
+        corridas.length;
+
+    let totalSeries = 0;
+
+    treinos.forEach(treino => {
+
+        (treino.Exercicios || []).forEach(exercicio => {
+
+            totalSeries +=
+                (exercicio.Series || []).length;
+        });
+    });
+
+    document.getElementById("totalSeries").textContent =
+        totalSeries;
+
+    const km = corridas.reduce(
+        (total,corrida) =>
+            total + Number(corrida.distancia_km || 0),
+        0
+    );
+
+    document.getElementById("totalKm").textContent =
+        `${km.toFixed(1)} km`;
+}
+
+/* =========================
+   RECORDES
+========================= */
+
+function encontrarMelhorDistancia(alvo){
+
+    const candidatas = corridas
+        .filter(c => {
+
+            const distancia =
+                Number(c.distancia_km || 0);
+
+            if(!distancia){
+                return false;
+            }
+
+            const diferenca =
+                Math.abs(distancia - alvo) / alvo;
+
+            return diferenca <= 0.05;
+        })
+        .filter(c =>
+            Number(c.tempo_segundos || 0) > 0
+        );
+
+    if(!candidatas.length){
+        return null;
+    }
+
+    return candidatas.sort(
+        (a,b) =>
+            Number(a.tempo_segundos) -
+            Number(b.tempo_segundos)
+    )[0];
+}
+
+function preencherRecorde(idTempo,idDetalhe,corrida){
+
+    if(!corrida){
+
+        document.getElementById(idTempo).textContent =
+            "—";
+
+        return;
+    }
+
+    document.getElementById(idTempo).textContent =
+        formatarTempo(corrida.tempo_segundos);
+
+    document.getElementById(idDetalhe).textContent =
+        `${Number(corrida.distancia_km).toFixed(2)} km • ${formatarData(corrida.data)}`;
+}
+
+function calcularRecordes(){
+
+    const cinco = encontrarMelhorDistancia(5);
+    const dez = encontrarMelhorDistancia(10);
+    const vinteUm = encontrarMelhorDistancia(21.1);
+
+    preencherRecorde(
+        "record5k",
+        "record5kDetail",
+        cinco
+    );
+
+    preencherRecorde(
+        "record10k",
+        "record10kDetail",
+        dez
+    );
+
+    preencherRecorde(
+        "record21k",
+        "record21kDetail",
+        vinteUm
+    );
+
+    const maior = [...corridas]
+        .filter(c =>
+            Number(c.distancia_km || 0) > 0
+        )
+        .sort(
+            (a,b) =>
+                Number(b.distancia_km) -
+                Number(a.distancia_km)
+        )[0];
+
+    if(maior){
+
+        document.getElementById("recordDistance")
+            .textContent =
+            `${Number(maior.distancia_km).toFixed(2)} km`;
+
+        document.getElementById("recordDistanceDetail")
+            .textContent =
+            `${formatarData(maior.data)} • ${formatarTempo(maior.tempo_segundos)}`;
+
+    }else{
+
+        document.getElementById("recordDistance")
+            .textContent = "—";
+    }
+}
+
+/* =========================
+   SEQUÊNCIA
+========================= */
+
+function obterDiasAtivos(){
+
+    const dias = new Set();
+
+    treinos.forEach(t => {
+
+        if(t.data){
+            dias.add(normalizarData(t.data));
+        }
+    });
+
+    corridas.forEach(c => {
+
+        if(c.data){
+            dias.add(normalizarData(c.data));
+        }
+    });
+
+    return [...dias].sort();
+}
+
+function diferencaDias(dataA,dataB){
+
+    const a =
+        new Date(`${dataA}T00:00:00`);
+
+    const b =
+        new Date(`${dataB}T00:00:00`);
+
+    return Math.round(
+        (b-a) / 86400000
+    );
+}
+
+function calcularSequencia(){
+
+    const dias = obterDiasAtivos();
+
+    document.getElementById("activeDays").textContent =
+        dias.length;
+
+    document.getElementById("totalActivities").textContent =
+        treinos.length + corridas.length;
+
+    if(!dias.length){
+
+        document.getElementById("currentStreak")
+            .textContent = "0 dias";
+
+        document.getElementById("bestStreak")
+            .textContent = "0 dias";
+
+        document.getElementById("bestStreakRecord")
+            .textContent = "0 dias";
+
+        return;
+    }
+
+    let melhor = 1;
+    let atual = 1;
+
+    for(let i=1;i<dias.length;i++){
+
+        if(diferencaDias(dias[i-1],dias[i]) === 1){
+
+            atual++;
+
+            if(atual > melhor){
+                melhor = atual;
+            }
+
+        }else{
+
+            atual = 1;
+        }
+    }
+
+    const hoje =
+        new Date();
+
+    hoje.setHours(0,0,0,0);
+
+    const ontem =
+        new Date(hoje);
+
+    ontem.setDate(
+        ontem.getDate()-1
+    );
+
+    const hojeString =
+        hoje.toISOString().slice(0,10);
+
+    const ontemString =
+        ontem.toISOString().slice(0,10);
+
+    let sequenciaAtual = 0;
+
+    if(
+        dias.includes(hojeString) ||
+        dias.includes(ontemString)
+    ){
+
+        let referencia =
+            dias.includes(hojeString)
+                ? hojeString
+                : ontemString;
+
+        sequenciaAtual = 1;
+
+        for(let i=dias.length-1;i>0;i--){
+
+            if(dias[i] === referencia){
+
+                let j=i-1;
+
+                while(
+                    j >= 0 &&
+                    diferencaDias(dias[j],dias[j+1]) === 1
+                ){
+
+                    sequenciaAtual++;
+                    j--;
+                }
+
+                break;
+            }
+        }
+    }
+
+    document.getElementById("currentStreak")
+        .textContent =
+        `${sequenciaAtual} ${sequenciaAtual === 1 ? "dia" : "dias"}`;
+
+    document.getElementById("bestStreak")
+        .textContent =
+        `${melhor} ${melhor === 1 ? "dia" : "dias"}`;
+
+    document.getElementById("bestStreakRecord")
+        .textContent =
+        `${melhor} ${melhor === 1 ? "dia" : "dias"}`;
+
+    document.getElementById("streakProgress")
+        .style.width =
+        `${Math.min((sequenciaAtual / Math.max(melhor,1))*100,100)}%`;
+
+    const ultimo =
+        dias[dias.length-1];
+
+    document.getElementById("lastActivity")
+        .textContent =
+        formatarData(ultimo);
+}
+
+/* =========================
+   ESTATÍSTICAS
+========================= */
+
+function calcularEstatisticas(){
+
+    const corridasComTempo =
+        corridas.filter(c =>
+            Number(c.tempo_segundos || 0) > 0
+        );
+
+    const tempoTotal =
+        corridasComTempo.reduce(
+            (total,c) =>
+                total + Number(c.tempo_segundos || 0),
+            0
+        );
+
+    document.getElementById("totalRunTime")
+        .textContent =
+        formatarTempo(tempoTotal);
+
+    const corridasComPace =
+        corridas.filter(c =>
+            Number(c.ritmo_segundos_km || 0) > 0
+        );
+
+    if(corridasComPace.length){
+
+        const media =
+            corridasComPace.reduce(
+                (total,c) =>
+                    total + Number(c.ritmo_segundos_km),
+                0
+            ) / corridasComPace.length;
+
+        document.getElementById("avgPace")
+            .textContent =
+            formatarPace(media);
+    }
+
+    const rpes =
+        corridas
+            .map(c => Number(c.rpe))
+            .filter(n => Number.isFinite(n) && n > 0);
+
+    if(rpes.length){
+
+        const mediaRpe =
+            rpes.reduce(
+                (a,b)=>a+b,
+                0
+            ) / rpes.length;
+
+        document.getElementById("avgRpe")
+            .textContent =
+            mediaRpe.toFixed(1);
+    }
+
+    if(corridas.length){
+
+        const totalKm =
+            corridas.reduce(
+                (a,c) =>
+                    a + Number(c.distancia_km || 0),
+                0
+            );
+
+        document.getElementById("avgDistance")
+            .textContent =
+            `${(totalKm / corridas.length).toFixed(2)} km`;
+    }
+}
+
+/* =========================
+   CARGAS
+========================= */
+
+function calcularCargas(){
+
+    const mapa = {};
+
+    treinos.forEach(treino => {
+
+        (treino.Exercicios || []).forEach(exercicio => {
+
+            (exercicio.Series || []).forEach(serie => {
+
+                const carga =
+                    Number(serie.carga);
+
+                if(
+                    !Number.isFinite(carga) ||
+                    carga <= 0
+                ){
+                    return;
+                }
+
+                const nome =
+                    exercicio.nome || "Exercício";
+
+                if(
+                    !mapa[nome] ||
+                    carga > mapa[nome].carga
+                ){
+
+                    mapa[nome] = {
+                        carga,
+                        unidade:
+                            serie.unidade || "kg"
+                    };
+                }
+            });
+        });
+    });
+
+    const container =
+        document.getElementById("loadRecords");
+
+    const registros =
+        Object.entries(mapa)
+            .sort(
+                (a,b) =>
+                    b[1].carga - a[1].carga
+            );
+
+    if(!registros.length){
+
+        container.innerHTML =
+            `<div class="empty" style="grid-column:1/-1;">
+                Ainda não existem cargas registradas.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML =
+        registros.map(([nome,info]) => `
+            <div class="card">
+                <div class="stat-label">
+                    ${escapeHtml(nome)}
+                </div>
+
+                <div class="stat-value green-text">
+                    ${info.carga}
+                    ${escapeHtml(info.unidade)}
+                </div>
+
+                <div class="stat-small">
+                    maior carga registrada
+                </div>
+            </div>
+        `).join("");
+}
+
+/* =========================
+   GRÁFICOS
+========================= */
+
+function renderizarGraficos(){
+
+    const ultimas =
+        [...corridas]
+            .filter(c =>
+                Number(c.distancia_km || 0) > 0
+            )
+            .sort(
+                (a,b) =>
+                    new Date(a.data) -
+                    new Date(b.data)
+            )
+            .slice(-12);
+
+    const labels =
+        ultimas.map(c =>
+            formatarData(c.data)
+        );
+
+    const distancias =
+        ultimas.map(c =>
+            Number(c.distancia_km || 0)
+        );
+
+    const paces =
+        ultimas.map(c => {
+
+            const pace =
+                Number(c.ritmo_segundos_km || 0);
+
+            return pace
+                ? pace / 60
+                : null;
+        });
+
+    if(charts.distance){
+        charts.distance.destroy();
+    }
+
+    if(charts.pace){
+        charts.pace.destroy();
+    }
+
+    charts.distance =
+        new Chart(
+            document.getElementById("distanceChart"),
+            {
+                type:"line",
+                data:{
+                    labels,
+                    datasets:[{
+                        label:"Distância (km)",
+                        data:distancias,
+                        tension:.35,
+                        fill:false
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{
+                            labels:{
+                                color:"#aeb8c4"
+                            }
+                        }
+                    },
+                    scales:{
+                        x:{
+                            ticks:{
+                                color:"#778392"
+                            },
+                            grid:{
+                                color:"rgba(255,255,255,.04)"
+                            }
+                        },
+                        y:{
+                            beginAtZero:true,
+                            ticks:{
+                                color:"#778392"
+                            },
+                            grid:{
+                                color:"rgba(255,255,255,.04)"
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+    charts.pace =
+        new Chart(
+            document.getElementById("paceChart"),
+            {
+                type:"line",
+                data:{
+                    labels,
+                    datasets:[{
+                        label:"Ritmo (min/km)",
+                        data:paces,
+                        tension:.35,
+                        spanGaps:true,
+                        fill:false
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{
+                            labels:{
+                                color:"#aeb8c4"
+                            }
+                        },
+                        tooltip:{
+                            callbacks:{
+                                label:function(context){
+
+                                    const valor =
+                                        context.raw;
+
+                                    if(
+                                        valor === null ||
+                                        valor === undefined
+                                    ){
+                                        return "Sem ritmo";
+                                    }
+
+                                    const totalSeg =
+                                        Math.round(valor*60);
+
+                                    return formatarPace(totalSeg);
+                                }
+                            }
+                        }
+                    },
+                    scales:{
+                        x:{
+                            ticks:{
+                                color:"#778392"
+                            },
+                            grid:{
+                                color:"rgba(255,255,255,.04)"
+                            }
+                        },
+                        y:{
+                            reverse:true,
+                            ticks:{
+                                color:"#778392",
+                                callback:function(value){
+                                    return value.toFixed(1);
+                                }
+                            },
+                            grid:{
+                                color:"rgba(255,255,255,.04)"
+                            }
+                        }
+                    }
+                }
+            }
+        );
+}
+
+/* =========================
+   CALENDÁRIO
+========================= */
+
+function mudarMes(direcao){
+
+    mesAtual.setMonth(
+        mesAtual.getMonth()+direcao
+    );
+
+    renderizarCalendario();
+}
+
+function irParaHoje(){
+
+    mesAtual = new Date();
+
+    mesAtual.setDate(1);
+
+    renderizarCalendario();
+}
+
+function renderizarCalendario(){
+
+    const ano =
+        mesAtual.getFullYear();
+
+    const mes =
+        mesAtual.getMonth();
+
+    const nomeMes =
+        new Intl.DateTimeFormat(
+            "pt-BR",
+            {
+                month:"long",
+                year:"numeric"
+            }
+        ).format(mesAtual);
+
+    document.getElementById("calendarTitle")
+        .textContent = nomeMes;
+
+    const primeiroDia =
+        new Date(ano,mes,1).getDay();
+
+    const totalDias =
+        new Date(ano,mes+1,0).getDate();
+
+    const calendar =
+        document.getElementById("calendar");
+
+    calendar.innerHTML = "";
+
+    for(let i=0;i<primeiroDia;i++){
+
+        const vazio =
+            document.createElement("div");
+
+        vazio.className = "day empty";
+
+        calendar.appendChild(vazio);
+    }
+
+    const hoje =
+        new Date();
+
+    const hojeString =
+        `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+
+    for(let dia=1;dia<=totalDias;dia++){
+
+        const data =
+            `${ano}-${String(mes+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+
+        const temTreino =
+            treinos.some(t =>
+                normalizarData(t.data) === data
+            );
+
+        const temCorrida =
+            corridas.some(c =>
+                normalizarData(c.data) === data
+            );
+
+        const div =
+            document.createElement("div");
+
+        div.className = "day";
+
+        if(data === hojeString){
+            div.classList.add("today");
+        }
+
+        div.innerHTML = `
+            <div class="day-number">${dia}</div>
+
+            <div class="dot-row">
+
+                ${
+                    temTreino
+                        ? `<span class="dot training"></span>`
+                        : ""
+                }
+
+                ${
+                    temCorrida
+                        ? `<span class="dot run"></span>`
+                        : ""
+                }
+
+            </div>
+        `;
+
+        div.onclick = () =>
+            mostrarDetalhesDia(data);
+
+        calendar.appendChild(div);
+    }
+}
+
+function mostrarDetalhesDia(data){
+
+    const treinoDia =
+        treinos.filter(t =>
+            normalizarData(t.data) === data
+        );
+
+    const corridaDia =
+        corridas.filter(c =>
+            normalizarData(c.data) === data
+        );
+
+    const box =
+        document.getElementById("calendarDetails");
+
+    let html = `
+        <div class="details-box">
+
+            <strong>
+                ${formatarData(data)}
+            </strong>
+    `;
+
+    if(!treinoDia.length && !corridaDia.length){
+
+        html += `
+            <p style="color:var(--muted);">
+                Nenhuma atividade registrada neste dia.
+            </p>
+        `;
+
+    }else{
+
+        treinoDia.forEach(t => {
+
+            const exercicios =
+                (t.Exercicios || []).length;
+
+            html += `
+                <div class="activity-item">
+
+                    <div class="activity-title">
+
+                        <strong>
+                            🏋️ ${escapeHtml(t.dia || "Treino")}
+                        </strong>
+
+                        <span class="badge green">
+                            ${exercicios} exercícios
+                        </span>
+
+                    </div>
+
+                    <div style="color:var(--muted);font-size:12px;margin-top:5px;">
+                        ${
+                            t.duracao
+                                ? `${t.duracao} min`
+                                : "Duração não informada"
+                        }
+                        ${
+                            t.rpe
+                                ? ` • RPE ${t.rpe}`
+                                : ""
+                        }
+                    </div>
+
+                </div>
+            `;
+        });
+
+        corridaDia.forEach(c => {
+
+            html += `
+                <div class="activity-item">
+
+                    <div class="activity-title">
+
+                        <strong>
+                            🏃 ${escapeHtml(c.tipo || "Corrida")}
+                        </strong>
+
+                        <span class="badge blue">
+                            ${Number(c.distancia_km || 0).toFixed(2)} km
+                        </span>
+
+                    </div>
+
+                    <div style="color:var(--muted);font-size:12px;margin-top:5px;">
+
+                        ${formatarTempo(c.tempo_segundos)}
+                        ${
+                            c.ritmo_segundos_km
+                                ? ` • ${formatarPace(c.ritmo_segundos_km)}`
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+            `;
+        });
+    }
+
+    html += `</div>`;
+
+    box.innerHTML = html;
+}
+
+/* =========================
+   HISTÓRICO TREINOS
+========================= */
+
+function renderizarHistoricoTreinos(){
+
+    const container =
+        document.getElementById("trainingHistory");
+
+    document.getElementById("trainingHistoryCount")
+        .textContent =
+        `${treinos.length} ${treinos.length === 1 ? "registro" : "registros"}`;
+
+    if(!treinos.length){
+
+        container.innerHTML =
+            `<div class="card empty">
+                Nenhum treino registrado ainda.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML =
+        treinos.map(treino => {
+
+            const exercicios =
+                treino.Exercicios || [];
+
+            return `
+                <div class="history-item">
+
+                    <div class="history-head"
+                         onclick="toggleHistory(this)">
+
+                        <div class="history-main">
+
+                            <div class="history-title">
+                                🏋️ ${escapeHtml(treino.dia || "Treino")}
+                            </div>
+
+                            <div class="history-date">
+                                ${formatarData(treino.data)}
+                                ${
+                                    treino.duracao
+                                        ? ` • ${treino.duracao} min`
+                                        : ""
+                                }
+                                ${
+                                    treino.rpe
+                                        ? ` • RPE ${treino.rpe}`
+                                        : ""
+                                }
+                            </div>
+
+                        </div>
+
+                        <div class="history-actions"
+                             onclick="event.stopPropagation()">
+
+                            <button
+                                class="small-btn red"
+                                onclick="excluirTreino('${treino.id}')">
+                                🗑️ Excluir
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="history-body">
+
+                        ${
+                            treino.observacoes
+                                ? `
+                                    <p style="color:var(--muted);">
+                                        ${escapeHtml(treino.observacoes)}
+                                    </p>
+                                  `
+                                : ""
+                        }
+
+                        ${
+                            exercicios.length
+                                ? exercicios
+                                    .sort(
+                                        (a,b) =>
+                                            Number(a.ordem || 0) -
+                                            Number(b.ordem || 0)
+                                    )
+                                    .map(exercicio => `
+
+                                        <div class="exercise">
+
+                                            <div class="exercise-name">
+                                                ${escapeHtml(exercicio.nome)}
+                                            </div>
+
+                                            <div class="series">
+
+                                                ${
+                                                    (exercicio.Series || [])
+                                                        .sort(
+                                                            (a,b) =>
+                                                                Number(a.numero || 0) -
+                                                                Number(b.numero || 0)
+                                                        )
+                                                        .map(serie => `
+
+                                                            <div class="series-pill">
+
+                                                                S${serie.numero}
+
+                                                                ${
+                                                                    serie.repeticoes
+                                                                        ? ` • ${serie.repeticoes} reps`
+                                                                        : ""
+                                                                }
+
+                                                                ${
+                                                                    serie.carga
+                                                                        ? ` • ${serie.carga} ${escapeHtml(serie.unidade || "kg")}`
+                                                                        : ""
+                                                                }
+
+                                                                ${
+                                                                    serie.rpe
+                                                                        ? ` • RPE ${serie.rpe}`
+                                                                        : ""
+                                                                }
+
+                                                            </div>
+
+                                                        `).join("")
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                    `).join("")
+                                : `
+                                    <div class="empty">
+                                        Nenhum exercício detalhado.
+                                    </div>
+                                  `
+                        }
+
+                    </div>
+
+                </div>
+            `;
+        }).join("");
+}
+
+function toggleHistory(element){
+
+    const item =
+        element.closest(".history-item");
+
+    item.classList.toggle("open");
+}
+
+/* =========================
+   HISTÓRICO CORRIDAS
+========================= */
+
+function renderizarHistoricoCorridas(){
+
+    const container =
+        document.getElementById("runningHistory");
+
+    document.getElementById("runningHistoryCount")
+        .textContent =
+        `${corridas.length} ${corridas.length === 1 ? "registro" : "registros"}`;
+
+    if(!corridas.length){
+
+        container.innerHTML =
+            `<div class="card empty">
+                Nenhuma corrida registrada ainda.
+            </div>`;
+
+        return;
+    }
+
+    container.innerHTML =
+        corridas.map(corrida => `
+
+            <div class="run-card">
+
+                <div class="run-top">
+
+                    <div>
+
+                        <div class="run-title">
+                            🏃 ${escapeHtml(corrida.tipo || "Corrida")}
+                        </div>
+
+                        <div class="run-date">
+                            ${formatarData(corrida.data)}
+                        </div>
+
+                    </div>
+
+                    <span class="badge blue">
+                        ${Number(corrida.distancia_km || 0).toFixed(2)} km
+                    </span>
+
+                </div>
+
+                <div class="run-stats">
+
+                    <div class="run-stat">
+                        <span>Tempo</span>
+                        <strong>
+                            ${formatarTempo(corrida.tempo_segundos)}
+                        </strong>
+                    </div>
+
+                    <div class="run-stat">
+                        <span>Ritmo</span>
+                        <strong>
+                            ${formatarPace(corrida.ritmo_segundos_km)}
+                        </strong>
+                    </div>
+
+                    <div class="run-stat">
+                        <span>RPE</span>
+                        <strong>
+                            ${corrida.rpe || "—"}
+                        </strong>
+                    </div>
+
+                    <div class="run-stat">
+                        <span>Distância</span>
+                        <strong>
+                            ${Number(corrida.distancia_km || 0).toFixed(2)} km
+                        </strong>
+                    </div>
+
+                </div>
+
+                ${
+                    corrida.observacoes
+                        ? `
+                            <div style="color:var(--muted);font-size:13px;margin-top:12px;">
+                                ${escapeHtml(corrida.observacoes)}
+                            </div>
+                          `
+                        : ""
+                }
+
+                <div class="run-actions">
+
+                    <button
+                        class="small-btn"
+                        onclick="abrirEditarCorrida('${corrida.id}')">
+                        ✏️ Editar
+                    </button>
+
+                    <button
+                        class="small-btn red"
+                        onclick="excluirCorrida('${corrida.id}')">
+                        🗑️ Excluir
+                    </button>
+
+                </div>
+
+            </div>
+
+        `).join("");
+}
+
+/* =========================
+   EDITAR CORRIDA
+========================= */
+
+function abrirEditarCorrida(id){
+
+    const corrida =
+        corridas.find(c => c.id === id);
+
+    if(!corrida){
+        return;
+    }
+
+    document.getElementById("editRunId")
+        .value = corrida.id;
+
+    document.getElementById("editDate")
+        .value = normalizarData(corrida.data);
+
+    document.getElementById("editType")
+        .value = corrida.tipo || "";
+
+    document.getElementById("editDistance")
+        .value = corrida.distancia_km || "";
+
+    document.getElementById("editTime")
+        .value =
+        corrida.tempo_segundos
+            ? (Number(corrida.tempo_segundos) / 60).toFixed(2)
+            : "";
+
+    document.getElementById("editPace")
+        .value =
+        corrida.ritmo_segundos_km
+            ? formatarPaceSemTexto(corrida.ritmo_segundos_km)
+            : "";
+
+    document.getElementById("editRpe")
+        .value = corrida.rpe || "";
+
+    document.getElementById("editNotes")
+        .value = corrida.observacoes || "";
+
+    document.getElementById("editModal")
+        .classList.add("show");
+}
+
+function formatarPaceSemTexto(segundos){
+
+    const min =
+        Math.floor(Number(segundos)/60);
+
+    const sec =
+        Math.round(Number(segundos)%60);
+
+    return `${min}:${String(sec).padStart(2,"0")}`;
+}
+
+function fecharModal(){
+
+    document.getElementById("editModal")
+        .classList.remove("show");
+}
+
+document.getElementById("editRunForm")
+.addEventListener("submit",async function(event){
+
+    event.preventDefault();
+
+    const id =
+        document.getElementById("editRunId").value;
+
+    const distancia =
+        Number(
+            document.getElementById("editDistance").value
+        );
+
+    const tempoMin =
+        Number(
+            document.getElementById("editTime").value
+        );
+
+    const pace =
+        paceParaSegundos(
+            document.getElementById("editPace").value
+        );
+
+    const rpeValue =
+        Number(
+            document.getElementById("editRpe").value
+        );
+
+    const dados = {
+
+        data:
+            document.getElementById("editDate").value,
+
+        tipo:
+            document.getElementById("editType").value.trim() || null,
+
+        distancia_km:
+            Number.isFinite(distancia)
+                ? distancia
+                : null,
+
+        tempo_segundos:
+            Number.isFinite(tempoMin) && tempoMin > 0
+                ? Math.round(tempoMin * 60)
+                : null,
+
+        ritmo_segundos_km:
+            pace,
+
+        rpe:
+            Number.isFinite(rpeValue) && rpeValue > 0
+                ? rpeValue
+                : null,
+
+        observacoes:
+            document.getElementById("editNotes").value.trim() || null
+    };
+
+    const {
+        error
+    } = await supabaseClient
+        .from("Corridas")
+        .update(dados)
+        .eq("id",id)
+        .eq("user_id",usuarioAtual.id);
+
+    if(error){
+
+        console.error(error);
+
+        mostrarToast(
+            "Erro ao salvar a corrida."
+        );
+
+        return;
+    }
+
+    fecharModal();
+
+    mostrarToast(
+        "✓ Corrida atualizada!"
+    );
+
+    await carregarTudo();
+});
+
+/* =========================
+   EXCLUIR CORRIDA
+========================= */
+
+async function excluirCorrida(id){
+
+    const confirmar =
+        confirm(
+            "Tem certeza que deseja excluir esta corrida?"
+        );
+
+    if(!confirmar){
+        return;
+    }
+
+    const {
+        error
+    } = await supabaseClient
+        .from("Corridas")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",usuarioAtual.id);
+
+    if(error){
+
+        console.error(error);
+
+        mostrarToast(
+            "Erro ao excluir corrida."
+        );
+
+        return;
+    }
+
+    mostrarToast(
+        "✓ Corrida excluída."
+    );
+
+    await carregarTudo();
+}
+
+/* =========================
+   EXCLUIR TREINO
+========================= */
+
+async function excluirTreino(id){
+
+    const confirmar =
+        confirm(
+            "Isso excluirá o treino e os exercícios/séries ligados a ele. Deseja continuar?"
+        );
+
+    if(!confirmar){
+        return;
+    }
+
+    const {
+        error
+    } = await supabaseClient
+        .from("Treinos")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",usuarioAtual.id);
+
+    if(error){
+
+        console.error(error);
+
+        mostrarToast(
+            "Erro ao excluir treino."
+        );
+
+        return;
+    }
+
+    mostrarToast(
+        "✓ Treino excluído."
+    );
+
+    await carregarTudo();
+}
+
+/* =========================
+   MODAL
+========================= */
+
+document.getElementById("editModal")
+.addEventListener("click",function(event){
+
+    if(event.target === this){
+        fecharModal();
+    }
+});
+
+/* =========================
+   INICIAR
+========================= */
+
+verificarLogin();
+
+</script>
+
+</body>
+</html>
