@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>RIQUE — Training System</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #080808;
+            --card: #111111;
+            --card2: #151515;
+            --border: #252525;
+            --text: #ffffff;
+            --muted: #777777;
+            --green: #72d685;
+            --green-dark: #244d2c;
+            --yellow: #d9c86c;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(
+                    circle at 80% 0%,
+                    #171717 0%,
+                    #080808 35%
+                );
+
+            color: var(--text);
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    transparent 0%,
+                    rgba(255,255,255,0.015) 50%,
+                    transparent 100%
+                );
+
+            animation: brilho 8s infinite linear;
+        }
+
+        @keyframes brilho {
+
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+
+        }
+
+        .container {
+            width: min(1100px, calc(100% - 40px));
+
+            margin: auto;
+
+            padding:
+                30px 0 70px;
+        }
+
+        /* HEADER */
+
+        header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 70px;
+
+            animation:
+                aparecer 0.7s ease both;
+        }
+
+        .logo {
+            font-size: 25px;
+
+            font-weight: 900;
+
+            letter-spacing: 4px;
+        }
+
+        .status {
+            color: #666;
+
+            font-size: 10px;
+
+            letter-spacing: 2px;
+        }
+
+        /* HERO */
+
+        .hero {
+            margin-bottom: 45px;
+
+            animation:
+                subir 0.8s ease both;
+        }
+
+        .hero small {
+            color: #666;
+
+            font-size: 11px;
+
+            letter-spacing: 3px;
+        }
+
+        .hero h1 {
+            font-size:
+                clamp(52px, 9vw, 95px);
+
+            line-height: 0.88;
+
+            margin-top: 14px;
+
+            letter-spacing: -4px;
+        }
+
+        .hero p {
+            color: #777;
+
+            margin-top: 25px;
+
+            font-size: 15px;
+        }
+
+        /* TREINO HOJE */
+
+        .treino-hoje {
+            position: relative;
+
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #171717,
+                    #0f0f0f
+                );
+
+            border: 1px solid var(--border);
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            margin-bottom: 18px;
+
+            animation:
+                subir 0.8s 0.15s ease both;
+
+            transition:
+                transform 0.3s ease,
+                border-color 0.3s ease;
+        }
+
+        .treino-hoje:hover {
+            transform: translateY(-3px);
+
+            border-color: #444;
+        }
+
+        .treino-hoje::after {
+            content: "";
+
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.025);
+
+            right: -60px;
+            top: -80px;
+        }
+
+        .label {
+            color: #777;
+
+            font-size: 10px;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 14px;
+        }
+
+        .dia-hoje {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+        }
+
+        .treino-hoje-nome {
+            font-size: 27px;
+
+            font-weight: bold;
+        }
+
+        .botao {
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-top: 22px;
+
+            padding:
+                13px 19px;
+
+            background: white;
+
+            color: black;
+
+            text-decoration: none;
+
+            border-radius: 11px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            transition:
+                transform 0.2s,
+                opacity 0.2s;
+        }
+
+        .botao:hover {
+            transform: translateX(3px);
+
+            opacity: 0.85;
+        }
+
+        /* PROGRESSO */
+
+        .progresso {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            margin-top: 18px;
+
+            animation:
+                subir 0.8s 0.25s ease both;
+        }
+
+        .progresso-topo {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-end;
+
+            gap: 20px;
+        }
+
+        .porcentagem {
+            font-size: 48px;
+
+            font-weight: 900;
+
+            line-height: 1;
+        }
+
+        .numero-treinos {
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .barra {
+            width: 100%;
+
+            height: 10px;
+
+            background: #242424;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+
+            margin-top: 22px;
+        }
+
+        .barra-progresso {
+            width: 0%;
+
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #4f9f5c,
+                    #72d685
+                );
+
+            border-radius: 20px;
+
+            transition:
+                width 1s cubic-bezier(
+                    .22,
+                    1,
+                    .36,
+                    1
+                );
+        }
+
+        .mensagem {
+            color: #999;
+
+            font-size: 13px;
+
+            margin-top: 16px;
+        }
+
+        /* ESTATÍSTICAS */
+
+        .resumo {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+
+            margin-top: 18px;
+        }
+
+        .resumo-card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 20px;
+
+            padding: 25px;
+
+            transition:
+                transform 0.25s,
+                border-color 0.25s;
+
+            animation:
+                subir 0.8s 0.35s ease both;
+        }
+
+        .resumo-card:hover {
+            transform: translateY(-4px);
+
+            border-color: #3a3a3a;
+        }
+
+        .resumo-card span {
+            display: block;
+
+            color: #666;
+
+            font-size: 10px;
+
+            letter-spacing: 1.5px;
+
+            margin-bottom: 12px;
+        }
+
+        .resumo-card strong {
+            font-size: 31px;
+        }
+
+        /* CALENDÁRIO */
+
+        .secao {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            margin-top: 18px;
+
+            animation:
+                subir 0.8s 0.45s ease both;
+        }
+
+        .secao-titulo {
+            color: #888;
+
+            font-size: 11px;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 22px;
+        }
+
+        .calendario {
+            display: grid;
+
+            grid-template-columns:
+                repeat(7, 1fr);
+
+            gap: 10px;
+        }
+
+        .dia-calendario {
+            min-height: 90px;
+
+            background: #151515;
+
+            border: 1px solid #252525;
+
+            border-radius: 15px;
+
+            padding: 12px;
+
+            position: relative;
+
+            transition:
+                transform 0.2s,
+                border-color 0.2s;
+        }
+
+        .dia-calendario:hover {
+            transform: translateY(-3px);
+
+            border-color: #444;
+        }
+
+        .dia-calendario .nome {
+            color: #666;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+        }
+
+        .dia-calendario .numero {
+            display: block;
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+            margin-top: 10px;
+        }
+
+        .dia-calendario .status-dia {
+            position: absolute;
+
+            bottom: 10px;
+            right: 10px;
+
+            font-size: 12px;
+        }
+
+        .dia-calendario.concluido {
+            background: #101b13;
+
+            border-color: #315e39;
+        }
+
+        .dia-calendario.concluido
+        .status-dia {
+            color: var(--green);
+        }
+
+        .dia-calendario.hoje {
+            border-color: white;
+
+            box-shadow:
+                0 0 0 1px white;
+        }
+
+        .dia-calendario.descanso {
+            opacity: 0.55;
+        }
+
+        /* ÚLTIMO TREINO */
+
+        .ultimo {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .ultimo-nome {
+            font-size: 20px;
+
+            font-weight: bold;
+        }
+
+        .ultimo-data {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-top: 7px;
+        }
+
+        .ultimo-rpe {
+            color: var(--green);
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        /* HISTÓRICO */
+
+        .historico-item {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            padding: 18px 0;
+
+            border-bottom:
+                1px solid #252525;
+
+            animation:
+                aparecer 0.4s ease both;
+        }
+
+        .historico-item:last-child {
+            border-bottom: none;
+        }
+
+        .historico-nome {
+            font-size: 15px;
+
+            font-weight: bold;
+        }
+
+        .historico-info {
+            color: #666;
+
+            font-size: 12px;
+
+            margin-top: 6px;
+        }
+
+        .historico-status {
+            color: var(--green);
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        .historico-vazio {
+            color: #555;
+
+            font-size: 13px;
+
+            padding: 5px 0;
+        }
+
+        /* ANIMAÇÕES */
+
+        @keyframes aparecer {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+
+        }
+
+        @keyframes subir {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+
+        }
+
+        @keyframes pulso {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+
+        }
+
+        .celebracao {
+            position: fixed;
+
+            inset: 0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                rgba(0,0,0,0.72);
+
+            backdrop-filter:
+                blur(8px);
+
+            z-index: 999;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transition:
+                opacity 0.3s;
+        }
+
+        .celebracao.ativa {
+            opacity: 1;
+
+            pointer-events: auto;
+        }
+
+        .celebracao-box {
+            text-align: center;
+
+            background: #151515;
+
+            border: 1px solid #333;
+
+            border-radius: 25px;
+
+            padding: 40px;
+
+            width:
+                min(90%, 420px);
+
+            transform:
+                scale(0.8);
+
+            transition:
+                transform 0.4s
+                cubic-bezier(
+                    .22,
+                    1,
+                    .36,
+                    1
+                );
+        }
+
+        .celebracao.ativa
+        .celebracao-box {
+            transform: scale(1);
+        }
+
+        .celebracao-icon {
+            font-size: 55px;
+
+            animation:
+                pulso 1s infinite;
+        }
+
+        .celebracao h2 {
+            margin-top: 15px;
+
+            font-size: 28px;
+        }
+
+        .celebracao p {
+            color: #777;
+
+            margin-top: 10px;
+
+            font-size: 14px;
+        }
+
+        .fechar-celebracao {
+            margin-top: 25px;
+
+            padding: 12px 20px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: white;
+
+            color: black;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            .container {
+                width:
+                    min(100% - 28px, 1100px);
+            }
+
+            header {
+                margin-bottom: 50px;
+            }
+
+            .status {
+                display: none;
+            }
+
+            .resumo {
+                grid-template-columns: 1fr;
+            }
+
+            .calendario {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .dia-calendario:last-child {
+                grid-column: span 2;
+            }
+
+            .ultimo {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+        }
+
+        @media (max-width: 450px) {
+
+            .hero h1 {
+                letter-spacing: -2px;
+            }
+
+            .progresso-topo {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .calendario {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <header>
+
+        <div class="logo">
+            RIQUE
+        </div>
+
+        <div class="status">
+            PERSONAL TRAINING SYSTEM
+        </div>
+
+    </header>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <small>
+            SEU SISTEMA DE TREINAMENTO
+        </small>
+
+        <h1>
+            MEU<br>
+            TREINO.
+        </h1>
+
+        <p>
+            Consistência. Progressão. Resultado.
+        </p>
+
+    </section>
+
+
+    <!-- TREINO DE HOJE -->
+
+    <section class="treino-hoje">
+
+        <div class="label">
+            TREINO DE HOJE
+        </div>
+
+        <div
+            class="dia-hoje"
+            id="diaHoje">
+        </div>
+
+        <div
+            class="treino-hoje-nome"
+            id="treinoHoje">
+        </div>
+
+        <a
+            href="treino.html"
+            class="botao">
+
+            ABRIR TREINO →
+
+        </a>
+
+    </section>
+
+
+    <!-- PROGRESSO -->
+
+    <section class="progresso">
+
+        <div class="label">
+            PROGRESSO DA SEMANA
+        </div>
+
+        <div class="progresso-topo">
+
+            <div class="porcentagem"
+                id="porcentagem">
+                0%
+            </div>
+
+            <div
+                class="numero-treinos"
+                id="numeroTreinos">
+
+                0 de 6 treinos concluídos
+
+            </div>
+
+        </div>
+
+
+        <div class="barra">
+
+            <div
+                class="barra-progresso"
+                id="barraProgresso">
+            </div>
+
+        </div>
+
+
+        <div
+            class="mensagem"
+            id="mensagemProgresso">
+        </div>
+
+    </section>
+
+
+    <!-- RESUMO -->
+
+    <section class="resumo">
+
+        <div class="resumo-card">
+
+            <span>
+                TREINOS CONCLUÍDOS
+            </span>
+
+            <strong
+                id="totalConcluidos">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="resumo-card">
+
+            <span>
+                TREINOS RESTANTES
+            </span>
+
+            <strong
+                id="totalRestantes">
+                6
+            </strong>
+
+        </div>
+
+
+        <div class="resumo-card">
+
+            <span>
+                SEQUÊNCIA
+            </span>
+
+            <strong
+                id="sequencia">
+                0
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- CALENDÁRIO -->
+
+    <section class="secao">
+
+        <div class="secao-titulo">
+            SEMANA ATUAL
+        </div>
+
+        <div
+            class="calendario"
+            id="calendario">
+        </div>
+
+    </section>
+
+
+    <!-- ÚLTIMO TREINO -->
+
+    <section class="secao">
+
+        <div class="secao-titulo">
+            ÚLTIMO TREINO
+        </div>
+
+        <div
+            class="ultimo"
+            id="ultimoTreino">
+        </div>
+
+    </section>
+
+
+    <!-- HISTÓRICO -->
+
+    <section class="secao">
+
+        <div class="secao-titulo">
+            HISTÓRICO DE TREINOS
+        </div>
+
+        <div
+            id="listaHistorico">
+        </div>
+
+    </section>
+
+
+</div>
+
+
+<!-- CELEBRAÇÃO -->
+
+<div
+    class="celebracao"
+    id="celebracao">
+
+    <div class="celebracao-box">
+
+        <div class="celebracao-icon">
+            🔥
+        </div>
+
+        <h2>
+            TREINO CONCLUÍDO
+        </h2>
+
+        <p>
+            Mais uma sessão registrada.
+            Continue construindo consistência.
+        </p>
+
+        <button
+            class="fechar-celebracao"
+            onclick="fecharCelebracao()">
+
+            CONTINUAR
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* ================================
+   CONFIGURAÇÃO
+================================ */
+
+
+const diasTreino = [
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado"
+];
+
+
+const nomesDias = {
+
+    domingo: "Domingo",
+    segunda: "Segunda",
+    terca: "Terça",
+    quarta: "Quarta",
+    quinta: "Quinta",
+    sexta: "Sexta",
+    sabado: "Sábado"
+
+};
+
+
+const nomesTreinos = {
+
+    domingo: "😴 Descanso",
+    segunda: "💪 Superiores A + Core",
+    terca: "🦵 Joelho + Pernas",
+    quarta: "🧘 Ativo + Mobilidade",
+    quinta: "💪 Superiores B + Core",
+    sexta: "🦵 Pernas + Glúteos",
+    sabado: "🏃 Condicionamento + Corpo inteiro"
+
+};
+
+
+/* ================================
+   DATA
+================================ */
+
+
+function dataISO(data = new Date()) {
+
+    const ano =
+        data.getFullYear();
+
+    const mes =
+        String(
+            data.getMonth() + 1
+        ).padStart(2, "0");
+
+    const dia =
+        String(
+            data.getDate()
+        ).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+
+}
+
+
+function inicioDaSemana(data = new Date()) {
+
+    const novaData =
+        new Date(data);
+
+    const dia =
+        novaData.getDay();
+
+    const diferenca =
+        dia === 0
+            ? -6
+            : 1 - dia;
+
+    novaData.setDate(
+        novaData.getDate() +
+        diferenca
+    );
+
+    novaData.setHours(
+        0, 0, 0, 0
+    );
+
+    return novaData;
+
+}
+
+
+function chaveDiaSemana(dia) {
+
+    const inicio =
+        inicioDaSemana();
+
+    const indice =
+        diasTreino.indexOf(dia);
+
+    const data =
+        new Date(inicio);
+
+    data.setDate(
+        inicio.getDate() +
+        indice
+    );
+
+    return dataISO(data);
+
+}
+
+
+/* ================================
+   HISTÓRICO
+================================ */
+
+
+function pegarHistorico() {
+
+    return JSON.parse(
+        localStorage.getItem(
+            "historicoTreinos"
+        )
+    ) || [];
+
+}
+
+
+function salvarHistorico(historico) {
+
+    localStorage.setItem(
+        "historicoTreinos",
+        JSON.stringify(historico)
+    );
+
+}
+
+
+/* ================================
+   TREINO DA SEMANA
+================================ */
+
+
+function treinoConcluidoNaData(
+    dia,
+    data
+) {
+
+    const historico =
+        pegarHistorico();
+
+    return historico.some(
+        registro =>
+            registro.dataISO === data &&
+            registro.dia === dia
+    );
+
+}
+
+
+/* ================================
+   DIA ATUAL
+================================ */
+
+
+const nomesDiasCompletos = {
+
+    domingo: "Domingo",
+    segunda: "Segunda-feira",
+    terca: "Terça-feira",
+    quarta: "Quarta-feira",
+    quinta: "Quinta-feira",
+    sexta: "Sexta-feira",
+    sabado: "Sábado"
+
+};
+
+
+const chavesDias = [
+    "domingo",
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado"
+];
+
+
+const hoje =
+    chavesDias[
+        new Date().getDay()
+    ];
+
+
+document.getElementById(
+    "diaHoje"
+).textContent =
+    nomesDiasCompletos[hoje];
+
+
+document.getElementById(
+    "treinoHoje"
+).textContent =
+    nomesTreinos[hoje];
+
+
+/* ================================
+   PROGRESSO
+================================ */
+
+
+function atualizarProgresso() {
+
+    const inicio =
+        inicioDaSemana();
+
+    let concluidos = 0;
+
+
+    diasTreino.forEach(
+        (dia, indice) => {
+
+            const data =
+                new Date(inicio);
+
+            data.setDate(
+                inicio.getDate() +
+                indice
+            );
+
+            if (
+                treinoConcluidoNaData(
+                    dia,
+                    dataISO(data)
+                )
+            ) {
+
+                concluidos++;
+
+            }
+
+        }
+    );
+
+
+    const porcentagem =
+        Math.round(
+            (
+                concluidos /
+                diasTreino.length
+            ) * 100
+        );
+
+
+    document.getElementById(
+        "porcentagem"
+    ).textContent =
+        porcentagem + "%";
+
+
+    document.getElementById(
+        "numeroTreinos"
+    ).textContent =
+        `${concluidos} de 6 treinos concluídos`;
+
+
+    document.getElementById(
+        "totalConcluidos"
+    ).textContent =
+        concluidos;
+
+
+    document.getElementById(
+        "totalRestantes"
+    ).textContent =
+        6 - concluidos;
+
+
+    document.getElementById(
+        "barraProgresso"
+    ).style.width =
+        porcentagem + "%";
+
+
+    const mensagem =
+        document.getElementById(
+            "mensagemProgresso"
+        );
+
+
+    if (concluidos === 0) {
+
+        mensagem.textContent =
+            "Comece a semana com o primeiro treino.";
+
+    } else if (concluidos < 3) {
+
+        mensagem.textContent =
+            "Boa! A semana começou. Mantenha a consistência.";
+
+    } else if (concluidos < 6) {
+
+        mensagem.textContent =
+            "Ótimo ritmo. Você já passou da metade da semana.";
+
+    } else {
+
+        mensagem.textContent =
+            "🔥 Semana completa! Todos os treinos registrados.";
+
+    }
+
+}
+
+
+/* ================================
+   CALENDÁRIO
+================================ */
+
+
+function carregarCalendario() {
+
+    const calendario =
+        document.getElementById(
+            "calendario"
+        );
+
+
+    calendario.innerHTML = "";
+
+
+    const inicio =
+        inicioDaSemana();
+
+
+    const nomesCurto = [
+        "SEG",
+        "TER",
+        "QUA",
+        "QUI",
+        "SEX",
+        "SÁB",
+        "DOM"
+    ];
+
+
+    const chaves = [
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado",
+        "domingo"
+    ];
+
+
+    for (
+        let i = 0;
+        i < 7;
+        i++
+    ) {
+
+        const data =
+            new Date(inicio);
+
+        data.setDate(
+            inicio.getDate() + i
+        );
+
+
+        const dia =
+            chaves[i];
+
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "dia-calendario";
+
+
+        if (dia === "domingo") {
+
+            div.classList.add(
+                "descanso"
+            );
+
+        }
+
+
+        if (
+            dataISO(data) ===
+            dataISO()
+        ) {
+
+            div.classList.add(
+                "hoje"
+            );
+
+        }
+
+
+        if (
+            treinoConcluidoNaData(
+                dia,
+                dataISO(data)
+            )
+        ) {
+
+            div.classList.add(
+                "concluido"
+            );
+
+        }
+
+
+        const status =
+            treinoConcluidoNaData(
+                dia,
+                dataISO(data)
+            )
+                ? "✓"
+                : dia === "domingo"
+                    ? "—"
+                    : "○";
+
+
+        div.innerHTML = `
+
+            <span class="nome">
+                ${nomesCurto[i]}
+            </span>
+
+            <span class="numero">
+                ${data.getDate()}
+            </span>
+
+            <span class="status-dia">
+                ${status}
+            </span>
+
+        `;
+
+
+        calendario.appendChild(
+            div
+        );
+
+    }
+
+}
+
+
+/* ================================
+   ÚLTIMO TREINO
+================================ */
+
+
+function carregarUltimoTreino() {
+
+    const container =
+        document.getElementById(
+            "ultimoTreino"
+        );
+
+
+    const historico =
+        pegarHistorico();
+
+
+    if (
+        historico.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div>
+
+                <div class="ultimo-nome">
+                    Nenhum treino registrado
+                </div>
+
+                <div class="ultimo-data">
+                    Seu primeiro treino aparecerá aqui.
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const ultimo =
+        historico[
+            historico.length - 1
+        ];
+
+
+    container.innerHTML = `
+
+        <div>
+
+            <div class="ultimo-nome">
+                ${nomesTreinos[ultimo.dia]}
+            </div>
+
+            <div class="ultimo-data">
+                ${ultimo.dataFormatada}
+                •
+                ${ultimo.horario}
+                ${
+                    ultimo.duracao
+                        ? " • " + ultimo.duracao + " min"
+                        : ""
+                }
+            </div>
+
+        </div>
+
+        <div class="ultimo-rpe">
+
+            RPE ${
+                ultimo.rpe || "—"
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================================
+   HISTÓRICO
+================================ */
+
+
+function carregarHistorico() {
+
+    const lista =
+        document.getElementById(
+            "listaHistorico"
+        );
+
+
+    const historico =
+        pegarHistorico();
+
+
+    if (
+        historico.length === 0
+    ) {
+
+        lista.innerHTML = `
+
+            <div class="historico-vazio">
+                Nenhum treino registrado ainda.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const ultimos =
+        [...historico]
+            .reverse()
+            .slice(0, 10);
+
+
+    lista.innerHTML =
+        ultimos
+            .map(
+                registro => `
+
+                    <div class="historico-item">
+
+                        <div>
+
+                            <div class="historico-nome">
+                                ${nomesTreinos[registro.dia]}
+                            </div>
+
+                            <div class="historico-info">
+
+                                ${registro.dataFormatada}
+                                •
+                                ${registro.horario}
+
+                                ${
+                                    registro.duracao
+                                        ? " • " +
+                                          registro.duracao +
+                                          " min"
+                                        : ""
+                                }
+
+                                ${
+                                    registro.rpe
+                                        ? " • RPE " +
+                                          registro.rpe
+                                        : ""
+                                }
+
+                            </div>
+
+                        </div>
+
+                        <div class="historico-status">
+                            ✓ CONCLUÍDO
+                        </div>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* ================================
+   SEQUÊNCIA
+================================ */
+
+
+function calcularSequencia() {
+
+    const historico =
+        pegarHistorico();
+
+
+    const datas =
+        [
+            ...new Set(
+                historico.map(
+                    registro =>
+                        registro.dataISO
+                )
+            )
+        ]
+        .sort()
+        .reverse();
+
+
+    if (
+        datas.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    let sequencia = 0;
+
+    let dataReferencia =
+        new Date();
+
+
+    for (
+        let i = 0;
+        i < datas.length;
+        i++
+    ) {
+
+        const data =
+            new Date(
+                datas[i] +
+                "T00:00:00"
+            );
+
+
+        const diferenca =
+            Math.round(
+                (
+                    dataReferencia -
+                    data
+                ) /
+                (
+                    1000 *
+                    60 *
+                    60 *
+                    24
+                )
+            );
+
+
+        if (
+            diferenca === 0 ||
+            diferenca === 1
+        ) {
+
+            sequencia++;
+
+            dataReferencia =
+                data;
+
+        } else {
+
+            break;
+
+        }
+
+    }
+
+
+    return sequencia;
+
+}
+
+
+document.getElementById(
+    "sequencia"
+).textContent =
+    calcularSequencia();
+
+
+/* ================================
+   CELEBRAÇÃO
+================================ */
+
+
+function fecharCelebracao() {
+
+    document
+        .getElementById(
+            "celebracao"
+        )
+        .classList.remove(
+            "ativa"
+        );
+
+}
+
+
+/* ================================
+   INICIALIZAÇÃO
+================================ */
+
+
+atualizarProgresso();
+
+carregarCalendario();
+
+carregarUltimoTreino();
+
+carregarHistorico();
+
+
+</script>
+
+
+</body>
+
+</html>
