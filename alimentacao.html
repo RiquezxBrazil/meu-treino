@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b12">
+<title>Alimentação | Meu Treino</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0b0b12;--card:#141420;--card2:#1b1b2b;--text:#f4f4f8;--muted:#a4a4b8;--purple:#9b7bff;--green:#b5ff5b;--border:#303044;--red:#ff6b81}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top right,#24183e 0,transparent 38%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+header{padding:18px;border-bottom:1px solid var(--border);background:rgba(11,11,18,.9)}
+.header-inner{max-width:1050px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:19px;font-weight:800}.brand span{color:var(--green)}
+nav{display:flex;flex-wrap:wrap;gap:7px}
+nav a,.button{border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;background:var(--card);color:var(--text);cursor:pointer}
+nav a.active{color:var(--green);border-color:var(--green)}
+main{width:min(1050px,92%);margin:28px auto 55px}
+.hero{padding:27px;border:1px solid #49376d;border-radius:22px;background:linear-gradient(130deg,#24183e,#171724 65%);margin-bottom:20px}
+.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+h1{margin:12px 0 8px;font-size:clamp(27px,5vw,38px)}h2{font-size:19px;margin-top:0}
+.muted{color:var(--muted);line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.stat,.panel,.meal{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:18px}
+.stat-label{color:var(--muted);font-size:12px}.stat-value{font-size:24px;font-weight:800;margin-top:10px}.stat-value small{font-size:12px;color:var(--muted);font-weight:400}
+.layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;align-items:start}
+label{display:block;margin:13px 0 7px;color:#dedeee;font-size:13px}
+input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;background:#0e0e18;color:var(--text);padding:12px;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--purple)}
+textarea{min-height:72px;resize:vertical}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:0 11px}
+.primary{width:100%;margin-top:17px;border:0;border-radius:11px;padding:14px;background:var(--green);color:#11140b;font-weight:800;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.message{margin-top:12px;font-size:13px;line-height:1.5;color:var(--muted)}
+.meal{margin-top:11px;padding:15px}
+.meal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.meal-title{font-weight:800}.meal-date{color:var(--muted);font-size:12px;margin-top:5px}
+.meal-food{margin:12px 0;white-space:pre-wrap;line-height:1.5}
+.macros{display:flex;gap:6px;flex-wrap:wrap}
+.tag{padding:7px 9px;border-radius:8px;background:var(--card2);font-size:12px;color:#dedeee}
+.delete{border:1px solid #643344;color:var(--red);background:transparent;padding:7px 9px;border-radius:8px;cursor:pointer}
+.empty{border:1px dashed var(--border);border-radius:12px;padding:22px 12px;text-align:center;color:var(--muted);margin-top:12px}
+#loginNotice{display:none;margin-bottom:20px;padding:18px;border:1px solid #6a4db1;border-radius:14px;background:var(--card)}
+.recommendation{padding:17px;border-radius:14px;background:var(--card2);border:1px solid #49376d;margin-top:12px}
+.rec-type{color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.rec-title{font-size:17px;font-weight:800;margin:10px 0}
+.rec-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.rec-buttons button{flex:1}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+@media(max-width:720px){.grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}header{position:static}.hero{padding:22px}.stat-value{font-size:21px}nav a{padding:9px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">MEU <span>TREINO</span></a>
+    <nav>
+      <a href="index.html">Painel</a>
+      <a href="treino.html">Treino</a>
+      <a href="corridas.html">Corridas</a>
+      <a href="evolucao.html">Evolução</a>
+      <a class="active" href="alimentacao.html">Alimentação</a>
+      <a href="estudos.html">Estudos</a>
+      <a href="rotina.html">Rotina</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">Nutrição · Consistência · Evolução</div>
+    <h1>Controle sua alimentação.</h1>
+    <p class="muted">Registre refeições, acompanhe os nutrientes e receba ideias econômicas e práticas para sua rotina de trabalho e corrida.</p>
+  </section>
+
+  <div id="loginNotice">
+    <h2>Faça login para continuar</h2>
+    <p class="muted">Entre pelo painel principal para acessar seus registros pessoais.</p>
+    <a class="button" href="index.html">Voltar ao painel</a>
+  </div>
+
+  <section id="appContent" style="display:none">
+    <section class="panel" style="margin-bottom:20px">
+      <div class="eyebrow">Assistente alimentar</div>
+      <h2 style="margin-top:10px">🍽️ O que comer a seguir?</h2>
+      <p class="muted">Sugestões econômicas com quatro refeições como referência. A recomendação é geral e não substitui uma avaliação nutricional.</p>
+      <label for="recommendationMeal">Escolha a refeição</label>
+      <select id="recommendationMeal">
+        <option value="0">Café da manhã</option>
+        <option value="1">Almoço</option>
+        <option value="2">Lanche para o trabalho</option>
+        <option value="3">Jantar</option>
+      </select>
+      <div id="recommendationContent" aria-live="polite"></div>
+      <div class="rec-buttons">
+        <button class="button" id="anotherSuggestion" type="button">Outra sugestão</button>
+        <button class="button" id="useSuggestion" type="button">Usar no registro</button>
+      </div>
+      <p class="message">As sugestões não são prescrições de porções ou metas calóricas. Os nutrientes só serão contabilizados quando você informar seus valores no registro.</p>
+    </section>
+
+    <div class="grid">
+      <div class="stat"><div class="stat-label">Refeições no dia</div><div class="stat-value" id="statMeals">0</div></div>
+      <div class="stat"><div class="stat-label">Proteínas registradas</div><div class="stat-value" id="statProtein">0 <small>g</small></div></div>
+      <div class="stat"><div class="stat-label">Calorias registradas</div><div class="stat-value" id="statCalories">0 <small>kcal</small></div></div>
+      <div class="stat"><div class="stat-label">Água registrada</div><div class="stat-value" id="statWater">0 <small>ml</small></div></div>
+    </div>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>＋ Registrar refeição</h2>
+        <p class="muted">Informe os alimentos e, se souber, os valores nutricionais.</p>
+        <form id="mealForm">
+          <div class="fields">
+            <div><label for="data">Data</label><input type="date" id="data" required></div>
+            <div><label for="refeicao">Refeição</label>
+              <select id="refeicao" required>
+                <option>Café da manhã</option><option>Lanche da manhã</option><option>Almoço</option><option>Lanche da tarde</option><option>Jantar</option><option>Ceia</option><option>Pós-treino</option><option>Outra</option>
+              </select>
+            </div>
+          </div>
+          <label for="alimentos">Alimentos e quantidades</label>
+          <textarea id="alimentos" placeholder="Ex.: 150 g de arroz, 120 g de frango, 2 ovos" required></textarea>
+          <div class="fields">
+            <div><label for="calorias">Calorias (kcal)</label><input type="number" id="calorias" min="0" step="1" placeholder="Ex.: 650"></div>
+            <div><label for="proteinas">Proteínas (g)</label><input type="number" id="proteinas" min="0" step="0.1" placeholder="Ex.: 40"></div>
+            <div><label for="carboidratos">Carboidratos (g)</label><input type="number" id="carboidratos" min="0" step="0.1" placeholder="Ex.: 70"></div>
+            <div><label for="gorduras">Gorduras (g)</label><input type="number" id="gorduras" min="0" step="0.1" placeholder="Ex.: 15"></div>
+            <div><label for="agua">Água (ml)</label><input type="number" id="agua" min="0" step="1" placeholder="Ex.: 500"></div>
+          </div>
+          <label for="observacoes">Observações (opcional)</label>
+          <textarea id="observacoes" placeholder="Saciedade, pré ou pós-treino..."></textarea>
+          <button class="primary" id="saveButton" type="submit">Salvar refeição</button>
+          <div class="message" id="formMessage" role="status"></div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Histórico alimentar</h2>
+        <p class="muted">Seus registros recentes, sincronizados com sua conta.</p>
+        <label for="filterDate">Filtrar por data</label>
+        <input type="date" id="filterDate">
+        <div id="mealList"><div class="empty">Carregando registros...</div></div>
+        <div class="rec-buttons">
+          <button class="button" id="clearFilter" type="button">Ver todos</button>
+          <button class="button" id="reloadButton" type="button">Atualizar</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+<footer>MEU TREINO · Construindo consistência, um dia de cada vez.</footer>
+
+<script>
+const SUPABASE_URL = "https://uukryfijipouzukeelmg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let records = [];
+let suggestionIndex = 0;
+
+const suggestions = [
+  {
+    type:"Café da manhã",
+    title:"Ovos, pão e banana",
+    food:"Ovos mexidos, pão e uma banana.",
+    description:"Opção prática com proteína e carboidratos para começar o dia."
+  },
+  {
+    type:"Café da manhã",
+    title:"Aveia com leite e banana",
+    food:"Aveia, leite e banana. Se desejar, acompanhe com ovos.",
+    description:"Ingredientes acessíveis e fáceis de preparar."
+  },
+  {
+    type:"Café da manhã",
+    title:"Iogurte, aveia e fruta",
+    food:"Iogurte natural, aveia e fruta da estação.",
+    description:"Uma opção rápida; mantenha o iogurte refrigerado."
+  },
+  {
+    type:"Almoço",
+    title:"Arroz, feijão, frango e salada",
+    food:"Arroz, feijão, frango e salada ou legumes.",
+    description:"Prato simples, com fontes de proteína, carboidratos e fibras."
+  },
+  {
+    type:"Almoço",
+    title:"Arroz, feijão e ovos",
+    food:"Arroz, feijão, ovos e vegetais disponíveis.",
+    description:"Alternativa econômica quando não houver frango pronto."
+  },
+  {
+    type:"Almoço",
+    title:"Carne moída, arroz e legumes",
+    food:"Carne moída, arroz e legumes.",
+    description:"Prepare porções extras para facilitar as refeições seguintes."
+  },
+  {
+    type:"Lanche para o trabalho",
+    title:"Sanduíche de frango",
+    food:"Pão com frango desfiado e tomate.",
+    description:"Prepare antes de sair e transporte em bolsa térmica com gelo reutilizável."
+  },
+  {
+    type:"Lanche para o trabalho",
+    title:"Iogurte, aveia e banana",
+    food:"Iogurte natural, aveia e banana.",
+    description:"Prático para levar; mantenha refrigerado até o consumo."
+  },
+  {
+    type:"Lanche para o trabalho",
+    title:"Ovos cozidos e fruta",
+    food:"Ovos cozidos e uma fruta.",
+    description:"Prepare com antecedência e mantenha os ovos refrigerados."
+  },
+  {
+    type:"Jantar",
+    title:"Arroz, feijão, frango e legumes",
+    food:"Arroz, feijão, frango e legumes.",
+    description:"Uma refeição completa com ingredientes que podem ser preparados em lote."
+  },
+  {
+    type:"Jantar",
+    title:"Omelete com arroz e salada",
+    food:"Omelete com vegetais, arroz e salada.",
+    description:"Alternativa rápida para quando chegar em casa."
+  },
+  {
+    type:"Jantar",
+    title:"Batata, ovos e legumes",
+    food:"Batata cozida ou assada, ovos e legumes.",
+    description:"Ingredientes simples; ajuste a quantidade à sua fome e ao treino do dia."
+  }
+];
+
+function todayLocal(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0,10);
+}
+function num(id){
+  const v = $(id).value.trim();
+  return v === "" ? 0 : Number(v);
+}
+function safeNum(v){ return Number(v || 0); }
+function fmt(v){ return safeNum(v).toLocaleString("pt-BR",{maximumFractionDigits:1}); }
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+function dateFmt(v){
+  if(!v)return "Sem data";
+  const p=v.slice(0,10).split("-");
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
+function message(txt,error=false){
+  $("formMessage").textContent=txt;
+  $("formMessage").style.color=error?"#ff6b81":"#b5ff5b";
+}
+
+function renderRecommendation(){
+  const selected = Number($("recommendationMeal").value);
+  const filtered = suggestions.filter(s=>{
+    if(selected===0)return s.type==="Café da manhã";
+    if(selected===1)return s.type==="Almoço";
+    if(selected===2)return s.type==="Lanche para o trabalho";
+    return s.type==="Jantar";
+  });
+  const item=filtered[suggestionIndex%filtered.length];
+  $("recommendationContent").innerHTML=`
+    <div class="recommendation">
+      <div class="rec-type">${esc(item.type)}</div>
+      <div class="rec-title">${esc(item.title)}</div>
+      <p class="muted">${esc(item.description)}</p>
+      <div><strong>Sugestão:</strong> ${esc(item.food)}</div>
+    </div>`;
+  return item;
+}
+
+function renderStats(list){
+  $("statMeals").textContent=list.length;
+  $("statProtein").innerHTML=`${fmt(list.reduce((s,r)=>s+safeNum(r.proteinas),0))} <small>g</small>`;
+  $("statCalories").innerHTML=`${fmt(list.reduce((s,r)=>s+safeNum(r.calorias),0))} <small>kcal</small>`;
+  $("statWater").innerHTML=`${fmt(list.reduce((s,r)=>s+safeNum(r.agua_ml),0))} <small>ml</small>`;
+}
+
+function renderMeals(){
+  const filter=$("filterDate").value;
+  const filtered=records.filter(r=>!filter||r.data===filter);
+  renderStats(filtered);
+  if(!filtered.length){
+    $("mealList").innerHTML='<div class="empty">Nenhuma refeição encontrada para esta data.</div>';
+    return;
+  }
+  $("mealList").innerHTML=filtered.map(r=>`
+    <article class="meal">
+      <div class="meal-top">
+        <div><div class="meal-title">${esc(r.refeicao||"Refeição")}</div><div class="meal-date">${dateFmt(r.data)}</div></div>
+        <button class="delete" type="button" data-delete="${esc(r.id)}">Excluir</button>
+      </div>
+      <div class="meal-food">${esc(r.alimentos||"")}</div>
+      <div class="macros">
+        <span class="tag">${fmt(r.calorias)} kcal</span>
+        <span class="tag">P: ${fmt(r.proteinas)} g</span>
+        <span class="tag">C: ${fmt(r.carboidratos)} g</span>
+        <span class="tag">G: ${fmt(r.gorduras)} g</span>
+        <span class="tag">Água: ${fmt(r.agua_ml)} ml</span>
+      </div>
+      ${r.observacoes?`<p class="muted">${esc(r.observacoes)}</p>`:""}
+    </article>`).join("");
+}
+
+async function loadMeals(){
+  $("mealList").innerHTML='<div class="empty">Carregando...</div>';
+  const {data,error}=await db.from("Alimentacao").select("*")
+    .order("data",{ascending:false})
+    .order("created_at",{ascending:false}).limit(100);
+  if(error){
+    $("mealList").innerHTML=`<div class="empty">Erro ao carregar: ${esc(error.message)}</div>`;
+    return;
+  }
+  records=data||[];
+  renderMeals();
+}
+
+$("mealForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!currentUser){message("Faça login pelo painel principal.",true);return;}
+  const payload={
+    user_id:currentUser.id,
+    data:$("data").value,
+    refeicao:$("refeicao").value,
+    alimentos:$("alimentos").value.trim(),
+    calorias:num("calorias"),
+    proteinas:num("proteinas"),
+    carboidratos:num("carboidratos"),
+    gorduras:num("gorduras"),
+    agua_ml:num("agua"),
+    observacoes:$("observacoes").value.trim()||null
+  };
+  if(!payload.data||!payload.alimentos){message("Preencha a data e os alimentos.",true);return;}
+  $("saveButton").disabled=true;
+  $("saveButton").textContent="Salvando...";
+  message("");
+  const {error}=await db.from("Alimentacao").insert(payload);
+  $("saveButton").disabled=false;
+  $("saveButton").textContent="Salvar refeição";
+  if(error){message("Erro ao salvar: "+error.message,true);return;}
+  $("mealForm").reset();
+  $("data").value=todayLocal();
+  message("Refeição salva com sucesso!");
+  await loadMeals();
+});
+
+$("mealList").addEventListener("click",async e=>{
+  const btn=e.target.closest("[data-delete]");
+  if(!btn)return;
+  if(!confirm("Deseja excluir esta refeição?"))return;
+  const {error}=await db.from("Alimentacao").delete().eq("id",btn.dataset.delete);
+  if(error){alert("Não foi possível excluir: "+error.message);return;}
+  await loadMeals();
+});
+$("filterDate").addEventListener("change",renderMeals);
+$("clearFilter").addEventListener("click",()=>{$("filterDate").value="";renderMeals();});
+$("reloadButton").addEventListener("click",loadMeals);
+$("recommendationMeal").addEventListener("change",()=>{suggestionIndex=0;renderRecommendation();});
+$("anotherSuggestion").addEventListener("click",()=>{suggestionIndex++;renderRecommendation();});
+$("useSuggestion").addEventListener("click",()=>{
+  const item=renderRecommendation();
+  $("refeicao").value=item.type==="Lanche para o trabalho"?"Lanche da tarde":item.type;
+  $("alimentos").value=item.food;
+  $("data").value=todayLocal();
+  $("alimentos").focus();
+  $("mealForm").scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+async function init(){
+  $("data").value=todayLocal();
+  renderRecommendation();
+  const {data,error}=await db.auth.getSession();
+  if(error||!data.session){
+    $("loginNotice").style.display="block";
+    return;
+  }
+  currentUser=data.session.user;
+  $("appContent").style.display="block";
+  await loadMeals();
+}
+db.auth.onAuthStateChange((_event,session)=>{
+  if(!session){
+    currentUser=null;
+    $("appContent").style.display="none";
+    $("loginNotice").style.display="block";
+  }else if(!currentUser){
+    currentUser=session.user;
+    $("loginNotice").style.display="none";
+    $("appContent").style.display="block";
+    loadMeals();
+  }
+});
+init();
+</script>
+</body>
+</html>

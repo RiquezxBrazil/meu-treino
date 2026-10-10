@@ -1,0 +1,444 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11101a">
+  <title>Estudos | Meu Sistema</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #11101a;
+      --panel: #1b1927;
+      --panel2: #242135;
+      --text: #f5f3ff;
+      --muted: #aaa5bf;
+      --green: #b6f36b;
+      --purple: #9b87ff;
+      --border: rgba(255,255,255,.09);
+      --red: #ff7777;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      background: radial-gradient(ellipse at top left, #282044 0, var(--bg) 48%);
+      font-family: Inter, system-ui, Arial, sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    .wrap { width: min(1000px, 92%); margin: auto; padding: 26px 0 50px; }
+    .top, .row, .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .top { flex-wrap: wrap; margin-bottom: 22px; }
+    .brand { color: var(--green); font-size: 12px; letter-spacing: 2px; font-weight: 800; }
+    h1 { font-size: clamp(28px, 5vw, 40px); margin: 7px 0; letter-spacing: -1px; }
+    h2 { font-size: 19px; margin: 0; }
+    .muted { color: var(--muted); }
+    .card {
+      background: linear-gradient(145deg, rgba(36,33,53,.96), rgba(25,23,37,.96));
+      border: 1px solid var(--border); border-radius: 19px; padding: 20px;
+      margin-bottom: 17px; box-shadow: 0 12px 35px rgba(0,0,0,.12);
+    }
+    .nav { display: flex; flex-wrap: wrap; gap: 9px; margin: 20px 0 25px; }
+    .btn {
+      display: inline-flex; justify-content: center; align-items: center; gap: 7px;
+      background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+      padding: 11px 14px; border-radius: 11px; cursor: pointer; font-weight: 650;
+      text-decoration: none;
+    }
+    .btn.primary { background: var(--green); color: #171b11; border-color: transparent; }
+    .btn.danger { color: #ffaaaa; }
+    .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    input, select, textarea {
+      width: 100%; padding: 12px; border-radius: 10px; color: var(--text);
+      background: #12111b; border: 1px solid var(--border); outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--purple); }
+    textarea { min-height: 85px; resize: vertical; }
+    .full { grid-column: 1 / -1; }
+    .stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+    .stat { padding: 15px; border-radius: 13px; background: rgba(255,255,255,.035); border: 1px solid var(--border); }
+    .stat strong { display: block; font-size: 26px; margin-top: 8px; }
+    .entry-list { display: grid; gap: 11px; margin-top: 15px; }
+    .entry { background: rgba(255,255,255,.035); border: 1px solid var(--border); border-radius: 13px; padding: 15px; }
+    .entry.done { border-color: rgba(182,243,107,.45); }
+    .entry h3 { margin: 0 0 7px; font-size: 16px; }
+    .entry p { margin: 7px 0; line-height: 1.5; overflow-wrap: anywhere; }
+    .entry small { color: var(--muted); }
+    .entry-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .status { min-height: 20px; color: var(--green); font-size: 13px; margin-top: 12px; }
+    .status.error { color: var(--red); }
+    .login { width: min(420px, 92%); margin: 10vh auto; }
+    .login input { margin: 7px 0 12px; }
+    .login .btn { width: 100%; margin-top: 8px; }
+    .hidden { display: none !important; }
+    .progress { height: 8px; background: #383349; border-radius: 20px; overflow: hidden; margin: 13px 0; }
+    .progress div { height: 100%; width: 0; background: linear-gradient(90deg,var(--purple),var(--green)); }
+    @media (max-width: 600px) {
+      .form-grid, .stats { grid-template-columns: 1fr; }
+      .card { padding: 16px; }
+      .nav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .nav .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <section id="loginScreen" class="card login">
+    <div class="brand">MEU SISTEMA · ESTUDOS</div>
+    <h1>Área de estudos.</h1>
+    <p class="muted">Entre com a mesma conta do seu painel.</p>
+    <form id="loginForm">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="seu@email.com">
+      <label for="password">Senha</label>
+      <input id="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+      <button class="btn primary" type="submit">Entrar</button>
+    </form>
+    <p id="loginMessage" class="muted" role="status"></p>
+  </section>
+
+  <main id="app" class="wrap hidden">
+    <header class="top">
+      <div>
+        <div class="brand">DISCIPLINA · CONHECIMENTO · EVOLUÇÃO</div>
+        <h1>Meu estudos.</h1>
+        <p class="muted">Registre cada sessão. Um pouco todos os dias faz diferença.</p>
+      </div>
+      <button id="logoutButton" class="btn danger" type="button">Sair ↗</button>
+    </header>
+
+    <nav class="nav">
+      <a href="index.html" class="btn">🏠 Painel</a>
+      <a href="treino.html" class="btn">💪 Treinos</a>
+      <a href="corridas.html" class="btn">🏃 Corridas</a>
+      <a href="alimentacao.html" class="btn">🥗 Alimentação</a>
+      <a href="rotina.html" class="btn">🌱 Rotina</a>
+      <a href="evolucao.html" class="btn">📈 Evolução</a>
+    </nav>
+
+    <section class="card">
+      <h2>📚 Registrar sessão de estudo</h2>
+      <p class="muted">Anote o que estudou e quanto tempo dedicou.</p>
+      <form id="studyForm" class="form-grid">
+        <div>
+          <label for="data">Data</label>
+          <input id="data" type="date" required>
+        </div>
+        <div>
+          <label for="materia">Matéria</label>
+          <select id="materia" required>
+            <option value="Português">Português</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Informática">Informática</option>
+            <option value="Conhecimentos Específicos">Conhecimentos Específicos</option>
+            <option value="Espanhol">Espanhol</option>
+            <option value="Inglês">Inglês</option>
+            <option value="Leitura">Leitura</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="atividade">O que você estudou?</label>
+          <input id="atividade" type="text" maxlength="180" required placeholder="Ex.: concordância verbal, 20 questões, aula 4...">
+        </div>
+        <div>
+          <label for="minutos">Duração (minutos)</label>
+          <input id="minutos" type="number" min="1" max="1440" required placeholder="Ex.: 30">
+        </div>
+        <div>
+          <label for="concluido">Status da sessão</label>
+          <select id="concluido">
+            <option value="true">Concluída</option>
+            <option value="false">Planejada / não concluída</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="observacoes">Observações (opcional)</label>
+          <textarea id="observacoes" maxlength="1000" placeholder="Dificuldades, resultado das questões, o que revisar..."></textarea>
+        </div>
+        <div class="full">
+          <button id="saveButton" class="btn primary" type="submit">＋ Salvar sessão</button>
+          <p id="formStatus" class="status" role="status"></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>📊 Seu progresso</h2>
+      <div class="stats" style="margin-top:15px">
+        <div class="stat"><span class="muted">Sessões registradas</span><strong id="totalSessions">0</strong></div>
+        <div class="stat"><span class="muted">Tempo concluído</span><strong id="totalHours">0 h</strong></div>
+        <div class="stat"><span class="muted">Sessões concluídas</span><strong id="completedSessions">0</strong></div>
+      </div>
+      <div class="progress"><div id="completionBar"></div></div>
+      <p id="completionText" class="muted">Registre sua primeira sessão para acompanhar o progresso.</p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>🗂️ Histórico de estudos</h2>
+        <button id="refreshButton" class="btn" type="button">↻ Atualizar</button>
+      </div>
+      <div class="form-grid" style="margin-top:15px">
+        <div>
+          <label for="filterMateria">Filtrar por matéria</label>
+          <select id="filterMateria">
+            <option value="">Todas as matérias</option>
+            <option>Português</option>
+            <option>Matemática</option>
+            <option>Informática</option>
+            <option>Conhecimentos Específicos</option>
+            <option>Espanhol</option>
+            <option>Inglês</option>
+            <option>Leitura</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label for="filterStatus">Filtrar por status</label>
+          <select id="filterStatus">
+            <option value="">Todas as sessões</option>
+            <option value="true">Concluídas</option>
+            <option value="false">Não concluídas</option>
+          </select>
+        </div>
+      </div>
+      <div id="history" class="entry-list">
+        <div class="entry muted">Carregando histórico...</div>
+      </div>
+      <p id="pageStatus" class="status" role="status"></p>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://uukryfijipouzukeelmg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const $ = (id) => document.getElementById(id);
+    let currentUser = null;
+    let sessions = [];
+
+    function localDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[char]));
+    }
+
+    function formatDate(value) {
+      if (!value) return "Sem data";
+      const d = new Date(`${value}T12:00:00`);
+      return Number.isNaN(d.getTime()) ? escapeHtml(value) : d.toLocaleDateString("pt-BR");
+    }
+
+    function setStatus(id, message, isError = false) {
+      $(id).textContent = message;
+      $(id).classList.toggle("error", isError);
+    }
+
+    function showApp(user) {
+      currentUser = user;
+      $("loginScreen").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      $("data").value = localDate();
+      loadSessions();
+    }
+
+    function renderSessions() {
+      const materiaFilter = $("filterMateria").value;
+      const statusFilter = $("filterStatus").value;
+
+      const filtered = sessions.filter((item) => {
+        if (materiaFilter && item.materia !== materiaFilter) return false;
+        if (statusFilter !== "" && String(item.concluido) !== statusFilter) return false;
+        return true;
+      });
+
+      const completed = sessions.filter((item) => item.concluido === true);
+      const totalMinutes = completed.reduce((sum, item) => sum + (Number(item.minutos) || 0), 0);
+      const total = sessions.length;
+      const done = completed.length;
+      const percent = total ? Math.round(done / total * 100) : 0;
+
+      $("totalSessions").textContent = total;
+      $("totalHours").textContent = `${Math.floor(totalMinutes / 60)} h${totalMinutes % 60 ? ` ${totalMinutes % 60} min` : ""}`;
+      $("completedSessions").textContent = done;
+      $("completionBar").style.width = `${percent}%`;
+      $("completionText").textContent = total
+        ? `${percent}% das sessões registradas estão concluídas. Continue mantendo a consistência.`
+        : "Registre sua primeira sessão para acompanhar o progresso.";
+
+      if (!filtered.length) {
+        $("history").innerHTML = `<div class="entry muted">${
+          sessions.length ? "Nenhuma sessão corresponde aos filtros escolhidos." : "Você ainda não registrou sessões de estudo."
+        }</div>`;
+        return;
+      }
+
+      $("history").innerHTML = filtered.map((item) => `
+        <article class="entry ${item.concluido ? "done" : ""}">
+          <div class="row">
+            <h3>${escapeHtml(item.materia)}</h3>
+            <small>${formatDate(item.data)}</small>
+          </div>
+          <p>${escapeHtml(item.atividade)}</p>
+          <small>⏱️ ${Number(item.minutos) || 0} min · ${item.concluido ? "✅ Concluída" : "🕓 Não concluída"}</small>
+          ${item.observacoes ? `<p class="muted">${escapeHtml(item.observacoes)}</p>` : ""}
+          <div class="entry-actions">
+            <button class="btn" type="button" data-toggle="${escapeHtml(item.id)}" data-done="${item.concluido ? "true" : "false"}">
+              ${item.concluido ? "↩ Marcar como pendente" : "✓ Marcar concluída"}
+            </button>
+            <button class="btn danger" type="button" data-delete="${escapeHtml(item.id)}">Excluir</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    async function loadSessions() {
+      if (!currentUser) return;
+      setStatus("pageStatus", "Carregando dados...");
+      const { data, error } = await db
+        .from("Estudos")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("data", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        setStatus("pageStatus", `Não consegui carregar. Confira a tabela "Estudos" e as políticas RLS. ${error.message}`, true);
+        $("history").innerHTML = `<div class="entry">Erro ao carregar o histórico. Verifique se a tabela "Estudos" existe com as colunas esperadas e se o acesso está liberado para sua conta.</div>`;
+        return;
+      }
+
+      sessions = data || [];
+      renderSessions();
+      setStatus("pageStatus", "Dados atualizados.");
+    }
+
+    $("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setStatus("loginMessage", "Entrando...");
+      const { data, error } = await db.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value
+      });
+
+      if (error) {
+        setStatus("loginMessage", error.message, true);
+        return;
+      }
+      showApp(data.user);
+    });
+
+    $("studyForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const payload = {
+        user_id: currentUser.id,
+        data: $("data").value,
+        materia: $("materia").value,
+        atividade: $("atividade").value.trim(),
+        minutos: Number($("minutos").value),
+        concluido: $("concluido").value === "true",
+        observacoes: $("observacoes").value.trim() || null
+      };
+
+      if (!payload.atividade || !payload.data || !Number.isFinite(payload.minutos) || payload.minutos < 1) {
+        setStatus("formStatus", "Preencha a data, a atividade e uma duração válida.", true);
+        return;
+      }
+
+      $("saveButton").disabled = true;
+      setStatus("formStatus", "Salvando sessão...");
+
+      const { error } = await db.from("Estudos").insert(payload);
+      $("saveButton").disabled = false;
+
+      if (error) {
+        console.error(error);
+        setStatus("formStatus", `Não foi possível salvar: ${error.message}`, true);
+        return;
+      }
+
+      $("atividade").value = "";
+      $("minutos").value = "";
+      $("observacoes").value = "";
+      $("concluido").value = "true";
+      setStatus("formStatus", "Sessão salva com sucesso!");
+      await loadSessions();
+    });
+
+    $("history").addEventListener("click", async (event) => {
+      const toggleButton = event.target.closest("[data-toggle]");
+      const deleteButton = event.target.closest("[data-delete]");
+
+      if (toggleButton) {
+        const id = toggleButton.dataset.toggle;
+        const currentValue = toggleButton.dataset.done === "true";
+        const { error } = await db.from("Estudos")
+          .update({ concluido: !currentValue })
+          .eq("id", id)
+          .eq("user_id", currentUser.id);
+
+        if (error) {
+          setStatus("pageStatus", `Não consegui atualizar: ${error.message}`, true);
+          return;
+        }
+        await loadSessions();
+      }
+
+      if (deleteButton) {
+        const id = deleteButton.dataset.delete;
+        if (!confirm("Deseja excluir esta sessão de estudo?")) return;
+
+        const { error } = await db.from("Estudos")
+          .delete()
+          .eq("id", id)
+          .eq("user_id", currentUser.id);
+
+        if (error) {
+          setStatus("pageStatus", `Não consegui excluir: ${error.message}`, true);
+          return;
+        }
+        await loadSessions();
+      }
+    });
+
+    $("filterMateria").addEventListener("change", renderSessions);
+    $("filterStatus").addEventListener("change", renderSessions);
+    $("refreshButton").addEventListener("click", loadSessions);
+
+    $("logoutButton").addEventListener("click", async () => {
+      await db.auth.signOut();
+      currentUser = null;
+      $("app").classList.add("hidden");
+      $("loginScreen").classList.remove("hidden");
+      setStatus("loginMessage", "Você saiu da sua conta.");
+    });
+
+    db.auth.onAuthStateChange((event, session) => {
+      if (session?.user && !currentUser) showApp(session.user);
+      if (!session?.user && event === "SIGNED_OUT") {
+        currentUser = null;
+        $("app").classList.add("hidden");
+        $("loginScreen").classList.remove("hidden");
+      }
+    });
+
+    (async function init() {
+      const { data, error } = await db.auth.getSession();
+      if (error) {
+        setStatus("loginMessage", "Não consegui verificar a sessão. Entre novamente.", true);
+        return;
+      }
+      if (data.session?.user) showApp(data.session.user);
+    })();
+  </script>
+</body>
+</html>

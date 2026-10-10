@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Rotina</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg: #0b0b12;
+  --card: #151521;
+  --purple: #8b5cf6;
+  --green: #b6ff4a;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --border: #2b2b3b;
+  --red: #fb7185;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 22px;
+  background: radial-gradient(ellipse at top, #21143b 0%, var(--bg) 48%);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+.container { max-width: 850px; margin: auto; }
+header { margin-bottom: 24px; }
+h1 { margin-bottom: 8px; font-size: 30px; }
+p { color: var(--muted); line-height: 1.5; }
+nav { display: flex; flex-wrap: wrap; gap: 9px; margin: 20px 0; }
+nav a {
+  color: var(--text); text-decoration: none;
+  padding: 10px 13px; border: 1px solid var(--border);
+  border-radius: 10px; background: #151521; font-size: 13px;
+}
+nav a.active { border-color: var(--green); color: var(--green); }
+.card {
+  background: rgba(21,21,33,.95);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-bottom: 17px;
+}
+h2 { margin-top: 0; font-size: 19px; }
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.stat {
+  background: #10101a; border: 1px solid var(--border);
+  border-radius: 12px; padding: 15px;
+}
+.stat strong { display: block; color: var(--green); font-size: 25px; margin-bottom: 6px; }
+.stat span { color: var(--muted); font-size: 12px; }
+label { display: block; margin: 13px 0 7px; font-size: 13px; color: #d4d4d8; }
+input, select, textarea {
+  width: 100%; padding: 12px; border-radius: 10px;
+  background: #0c0c15; color: white; border: 1px solid #363647;
+  font: inherit; outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--purple); }
+textarea { min-height: 75px; resize: vertical; }
+button {
+  cursor: pointer; border: 0; border-radius: 10px;
+  padding: 12px 15px; font-weight: bold; font-size: 14px;
+}
+.primary { background: var(--green); color: #111; width: 100%; margin-top: 16px; }
+.secondary { background: #29243a; color: white; }
+.danger { background: #3a1824; color: var(--red); }
+.habit-list { display: grid; gap: 10px; }
+.habit {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px; border: 1px solid var(--border);
+  background: #10101a; border-radius: 12px;
+}
+.habit.done { border-color: #527c28; background: #172014; }
+.habit .check {
+  flex: 0 0 25px; width: 25px; height: 25px; padding: 0;
+  border: 1px solid #626276; background: transparent; color: var(--green);
+  font-size: 17px;
+}
+.habit.done .check { background: var(--green); color: #111; border-color: var(--green); }
+.habit-info { flex: 1; min-width: 0; }
+.habit-info strong { display: block; margin-bottom: 5px; }
+.habit-info small { color: var(--muted); overflow-wrap: anywhere; }
+.habit.done .habit-info strong { color: var(--green); }
+.habit-actions { display: flex; gap: 7px; }
+.habit-actions button { padding: 8px; font-size: 12px; }
+.message { padding: 12px; border-radius: 10px; margin: 12px 0; display: none; }
+.message.error { display: block; color: #fecdd3; background: #351720; }
+.message.success { display: block; color: #d9f99d; background: #1c2b13; }
+#app { display: none; }
+#loading { text-align: center; padding: 50px 10px; color: var(--muted); }
+#login { max-width: 400px; margin: 50px auto; display: none; }
+#login button { width: 100%; margin-top: 12px; }
+.progress-track { height: 9px; border-radius: 20px; background: #303040; overflow: hidden; margin-top: 12px; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--purple),var(--green)); transition: width .3s; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0; }
+@media(max-width:560px) {
+  body { padding: 14px; }
+  h1 { font-size: 26px; }
+  .card { padding: 15px; }
+  .stats { gap: 7px; }
+  .stat { padding: 11px 8px; }
+  .stat strong { font-size: 21px; }
+  .stat span { font-size: 11px; }
+  .habit { padding: 11px; gap: 9px; }
+  .habit-actions { flex-direction: column; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div id="loading">Carregando sua rotina...</div>
+
+  <section id="login" class="card">
+    <h1>🔐 Minha Rotina</h1>
+    <p>Entre com a mesma conta usada no Meu Treino.</p>
+    <form id="loginForm">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" required autocomplete="email">
+      <label for="password">Senha</label>
+      <input id="password" type="password" required autocomplete="current-password">
+      <button class="primary" type="submit">Entrar</button>
+      <div id="loginMessage" class="message"></div>
+    </form>
+  </section>
+
+  <main id="app">
+    <header>
+      <h1>🌱 Minha Rotina</h1>
+      <p>Pequenas ações todos os dias constroem grandes resultados.</p>
+      <nav>
+        <a href="index.html">🏠 Painel</a>
+        <a href="treino.html">💪 Treino</a>
+        <a href="corridas.html">🏃 Corridas</a>
+        <a href="evolucao.html">📈 Evolução</a>
+        <a href="alimentacao.html">🥗 Alimentação</a>
+        <a href="estudos.html">📚 Estudos</a>
+        <a href="rotina.html" class="active">🌱 Rotina</a>
+      </nav>
+    </header>
+
+    <section class="card">
+      <h2>📊 Seu dia em números</h2>
+      <div class="stats">
+        <div class="stat"><strong id="totalHabits">0</strong><span>Hábitos cadastrados</span></div>
+        <div class="stat"><strong id="doneHabits">0</strong><span>Concluídos hoje</span></div>
+        <div class="stat"><strong id="percentage">0%</strong><span>Progresso do dia</span></div>
+      </div>
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <p id="progressText">Vamos começar o dia!</p>
+    </section>
+
+    <section class="card">
+      <h2>➕ Adicionar hábito</h2>
+      <form id="habitForm">
+        <label for="date">Data</label>
+        <input type="date" id="date" required>
+
+        <label for="habitName">Hábito</label>
+        <select id="habitName" required>
+          <option value="Oração">🙏 Oração</option>
+          <option value="Leitura">📖 Leitura</option>
+          <option value="Espanhol">🇪🇸 Espanhol</option>
+          <option value="Inglês">🇬🇧 Inglês</option>
+          <option value="Sol da manhã">☀️ Sol da manhã</option>
+          <option value="Mobilidade">🧘 Mobilidade</option>
+          <option value="Alongamento">🤸 Alongamento</option>
+          <option value="Finanças">💰 Organizar finanças</option>
+          <option value="Família">❤️ Tempo com a família</option>
+          <option value="Sono">😴 Respeitar horário de sono</option>
+          <option value="Outro">✍️ Outro</option>
+        </select>
+
+        <label for="notes">Observações (opcional)</label>
+        <textarea id="notes" placeholder="Ex.: 15 minutos de leitura..."></textarea>
+
+        <button type="submit" class="primary" id="saveButton">Adicionar à rotina</button>
+        <div id="formMessage" class="message"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>✅ Hábitos do dia</h2>
+      <label for="filterDate">Visualizar data</label>
+      <input type="date" id="filterDate">
+      <div id="habitList" class="habit-list" style="margin-top:15px">
+        <p>Carregando hábitos...</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>📅 Histórico recente</h2>
+      <p>Veja os hábitos registrados nos últimos dias.</p>
+      <div id="historyList" class="habit-list"><p>Carregando histórico...</p></div>
+    </section>
+
+    <button class="secondary" id="logoutButton" type="button">Sair da conta</button>
+    <footer>Meu Treino · Sua evolução acontece um dia de cada vez.</footer>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = "https://uukryfijipouzukeelmg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let habits = [];
+
+const $ = id => document.getElementById(id);
+
+function localDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+function showMessage(id, message, type = "error") {
+  const el = $(id);
+  el.textContent = message;
+  el.className = "message " + type;
+}
+
+function clearMessage(id) {
+  $(id).textContent = "";
+  $(id).className = "message";
+}
+
+function showApp() {
+  $("loading").style.display = "none";
+  $("login").style.display = "none";
+  $("app").style.display = "block";
+}
+
+function showLogin() {
+  $("loading").style.display = "none";
+  $("app").style.display = "none";
+  $("login").style.display = "block";
+}
+
+async function checkSession() {
+  const { data, error } = await db.auth.getSession();
+  if (error) {
+    $("loading").textContent = "Não foi possível verificar sua sessão. Atualize a página.";
+    return;
+  }
+  if (data.session) {
+    currentUser = data.session.user;
+    showApp();
+    await loadHabits();
+  } else {
+    showLogin();
+  }
+}
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMessage("loginMessage");
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email: $("email").value.trim(),
+    password: $("password").value
+  });
+
+  if (error) {
+    showMessage("loginMessage", "Não foi possível entrar. Confira seu e-mail e senha.");
+    return;
+  }
+
+  currentUser = data.user;
+  showApp();
+  await loadHabits();
+});
+
+$("logoutButton").addEventListener("click", async () => {
+  await db.auth.signOut();
+  currentUser = null;
+  habits = [];
+  showLogin();
+});
+
+$("date").value = localDate();
+$("filterDate").value = localDate();
+
+$("habitForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMessage("formMessage");
+
+  if (!currentUser) return;
+
+  const payload = {
+    user_id: currentUser.id,
+    data: $("date").value,
+    habito: $("habitName").value,
+    concluido: false,
+    observacoes: $("notes").value.trim()
+  };
+
+  $("saveButton").disabled = true;
+  $("saveButton").textContent = "Salvando...";
+
+  const { error } = await db.from("Rotina").insert(payload);
+
+  $("saveButton").disabled = false;
+  $("saveButton").textContent = "Adicionar à rotina";
+
+  if (error) {
+    console.error(error);
+    showMessage("formMessage", "Erro ao salvar. Confira se a tabela Rotina tem as colunas data, habito, concluido e observacoes.");
+    return;
+  }
+
+  $("notes").value = "";
+  showMessage("formMessage", "Hábito adicionado com sucesso!", "success");
+  $("filterDate").value = $("date").value;
+  await loadHabits();
+});
+
+$("filterDate").addEventListener("change", renderHabits);
+
+async function loadHabits() {
+  if (!currentUser) return;
+
+  $("habitList").innerHTML = "<p>Carregando...</p>";
+  $("historyList").innerHTML = "<p>Carregando...</p>";
+
+  const { data, error } = await db
+    .from("Rotina")
+    .select("*")
+    .order("data", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(300);
+
+  if (error) {
+    console.error(error);
+    $("habitList").innerHTML = "<p>Não foi possível carregar. Confira a tabela Rotina e suas políticas RLS no Supabase.</p>";
+    $("historyList").innerHTML = "";
+    return;
+  }
+
+  habits = data || [];
+  renderHabits();
+  renderHistory();
+}
+
+function renderStats(items) {
+  const total = items.length;
+  const done = items.filter(item => item.concluido).length;
+  const percentage = total ? Math.round(done / total * 100) : 0;
+
+  $("totalHabits").textContent = total;
+  $("doneHabits").textContent = done;
+  $("percentage").textContent = percentage + "%";
+  $("progressFill").style.width = percentage + "%";
+
+  $("progressText").textContent = total === 0
+    ? "Adicione seu primeiro hábito para começar."
+    : percentage === 100
+      ? "Excelente! Você concluiu todos os hábitos deste dia. 🎉"
+      : "Você concluiu " + done + " de " + total + " hábitos. Continue!";
+}
+
+function renderHabits() {
+  const date = $("filterDate").value || localDate();
+  const items = habits.filter(item => item.data === date);
+
+  renderStats(items);
+
+  if (!items.length) {
+    $("habitList").innerHTML = "<p>Nenhum hábito registrado para esta data. Adicione um acima!</p>";
+    return;
+  }
+
+  $("habitList").innerHTML = items.map(item => `
+    <div class="habit ${item.concluido ? "done" : ""}">
+      <button class="check" title="Alternar conclusão" onclick="toggleHabit('${item.id}', ${!item.concluido})">
+        ${item.concluido ? "✓" : ""}
+      </button>
+      <div class="habit-info">
+        <strong>${escapeHTML(item.habito)}</strong>
+        <small>${item.concluido ? "Concluído" : "Pendente"}${item.observacoes ? " · " + escapeHTML(item.observacoes) : ""}</small>
+      </div>
+      <div class="habit-actions">
+        <button class="danger" onclick="deleteHabit('${item.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderHistory() {
+  const recent = habits.slice(0, 30);
+
+  if (!recent.length) {
+    $("historyList").innerHTML = "<p>Seu histórico aparecerá aqui conforme você registrar hábitos.</p>";
+    return;
+  }
+
+  const grouped = {};
+  recent.forEach(item => {
+    if (!grouped[item.data]) grouped[item.data] = [];
+    grouped[item.data].push(item);
+  });
+
+  $("historyList").innerHTML = Object.entries(grouped).map(([date, items]) => {
+    const done = items.filter(item => item.concluido).length;
+    const formatted = date.split("-").reverse().join("/");
+    return `
+      <div class="habit">
+        <div class="habit-info">
+          <strong>${escapeHTML(formatted)} · ${done}/${items.length} concluídos</strong>
+          <small>${items.map(item => (item.concluido ? "✓ " : "○ ") + escapeHTML(item.habito)).join(" · ")}</small>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+async function toggleHabit(id, completed) {
+  const { error } = await db.from("Rotina")
+    .update({ concluido: completed })
+    .eq("id", id)
+    .eq("user_id", currentUser.id);
+
+  if (error) {
+    alert("Não foi possível atualizar o hábito. Confira as políticas de atualização (UPDATE) no Supabase.");
+    console.error(error);
+    return;
+  }
+  await loadHabits();
+}
+
+async function deleteHabit(id) {
+  if (!confirm("Tem certeza de que deseja excluir este hábito?")) return;
+
+  const { error } = await db.from("Rotina")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", currentUser.id);
+
+  if (error) {
+    alert("Não foi possível excluir o hábito. Confira as políticas de exclusão (DELETE) no Supabase.");
+    console.error(error);
+    return;
+  }
+  await loadHabits();
+}
+
+checkSession();
+</script>
+</body>
+</html>
