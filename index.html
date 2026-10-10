@@ -7,453 +7,148 @@
   <meta name="theme-color" content="#11101a">
   <title>Meu Treino | Henrique</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     :root {
-      --bg: #11101a;
-      --panel: #1b1927;
-      --panel2: #242135;
-      --text: #f5f3ff;
-      --muted: #aaa5bf;
-      --green: #b6f36b;
-      --purple: #9b87ff;
-      --border: rgba(255,255,255,.09);
-      --red: #ff7777;
+      --bg:#11101a; --panel:#1b1927; --panel2:#242135;
+      --text:#f5f3ff; --muted:#aaa5bf; --green:#b6f36b;
+      --purple:#9b87ff; --border:rgba(255,255,255,.09);
+      --red:#ff7777;
     }
-
-    * { box-sizing: border-box; }
-
-    html { min-height: 100%; scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, system-ui, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at 15% 10%, rgba(117,79,190,.22), transparent 45%),
-        radial-gradient(ellipse at 90% 85%, rgba(90,135,58,.10), transparent 40%),
-        var(--bg);
+    *{box-sizing:border-box}
+    html{min-height:100%;scroll-behavior:smooth}
+    body{
+      margin:0;min-height:100vh;
+      font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);
+      background:radial-gradient(ellipse at 15% 10%,rgba(117,79,190,.22),transparent 45%),
+      radial-gradient(ellipse at 90% 85%,rgba(90,135,58,.10),transparent 40%),var(--bg)
     }
-
-    button, input { font: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    a { color: inherit; text-decoration: none; }
-
-    .hidden { display: none !important; }
-
-    /* CAPA INICIAL */
-
-    .welcome-screen {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 28px 22px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
+    button,input{font:inherit}
+    button,a{-webkit-tap-highlight-color:transparent}
+    a{color:inherit;text-decoration:none}
+    .hidden{display:none!important}
+    .welcome-screen{
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;padding:28px 22px;text-align:center;
+      position:relative;overflow:hidden;isolation:isolate
     }
-
-    .welcome-screen::before {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      width: min(75vw, 560px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      border: 1px solid rgba(182,243,107,.08);
-      box-shadow:
-        0 0 0 45px rgba(155,135,255,.025),
-        0 0 0 95px rgba(155,135,255,.018);
+    .welcome-screen:before{
+      content:"";position:absolute;z-index:-1;width:min(75vw,560px);
+      aspect-ratio:1;border-radius:50%;border:1px solid rgba(182,243,107,.08);
+      box-shadow:0 0 0 45px rgba(155,135,255,.025),0 0 0 95px rgba(155,135,255,.018)
     }
-
-    .welcome-content {
-      width: min(720px, 100%);
-      animation: welcomeIn .9s ease both;
+    .welcome-content{width:min(720px,100%);animation:welcomeIn .9s ease both}
+    .welcome-mark{
+      width:68px;height:68px;margin:0 auto 28px;border:1px solid rgba(182,243,107,.5);
+      border-radius:22px;display:grid;place-items:center;color:var(--green);
+      font-size:28px;background:rgba(182,243,107,.06);
+      box-shadow:0 0 50px rgba(182,243,107,.08)
     }
-
-    .welcome-mark {
-      width: 68px;
-      height: 68px;
-      margin: 0 auto 28px;
-      border: 1px solid rgba(182,243,107,.5);
-      border-radius: 22px;
-      display: grid;
-      place-items: center;
-      color: var(--green);
-      font-size: 28px;
-      background: rgba(182,243,107,.06);
-      box-shadow: 0 0 50px rgba(182,243,107,.08);
+    .welcome-label{color:var(--green);text-transform:uppercase;letter-spacing:4px;font-size:11px;font-weight:800}
+    .welcome-title{font-size:clamp(36px,8vw,70px);line-height:1.08;letter-spacing:-2.8px;margin:22px 0 14px;font-weight:850}
+    .welcome-title span{color:var(--green);display:block}
+    .welcome-subtitle{color:var(--muted);font-size:clamp(14px,2.5vw,17px);margin:0}
+    .welcome-divider{height:1px;width:64px;margin:35px auto 27px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+    .welcome-quote{font-size:clamp(17px,3vw,23px);line-height:1.65;font-weight:500;max-width:600px;margin:0 auto 14px}
+    .welcome-author{color:var(--green);font-size:13px;letter-spacing:.5px}
+    .enter-button{
+      margin:38px auto 0;width:min(260px,100%);min-height:56px;border:0;
+      border-radius:15px;background:var(--green);color:#171b11;font-weight:850;
+      letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;gap:14px;transition:transform .2s,box-shadow .2s,background .2s;
+      box-shadow:0 8px 30px rgba(182,243,107,.12)
     }
-
-    .welcome-label {
-      color: var(--green);
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      font-size: 11px;
-      font-weight: 800;
+    .enter-button:hover{transform:translateY(-3px);box-shadow:0 12px 38px rgba(182,243,107,.22);background:#c5ff83}
+    .enter-button:active{transform:scale(.98)}
+    .welcome-footer{position:absolute;bottom:22px;left:15px;right:15px;color:#777188;font-size:11px;letter-spacing:1.5px;text-align:center}
+    @keyframes welcomeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .login{width:min(420px,92%);margin:10vh auto}
+    .login input{width:100%;padding:13px;margin:7px 0 12px;color:var(--text);background:#12111b;border:1px solid var(--border);border-radius:10px}
+    .login .btn{width:100%;margin-top:8px}
+    .wrap{width:min(1120px,92%);margin:auto;padding:28px 0 50px}
+    .top,.row,.nav,.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .top{margin-bottom:24px;flex-wrap:wrap}
+    .brand{font-size:13px;letter-spacing:2px;color:var(--green);font-weight:800}
+    h1{margin:6px 0;font-size:clamp(28px,5vw,42px);letter-spacing:-1px}
+    h2{font-size:19px;margin:0}
+    h3{margin:0 0 8px;font-size:16px}
+    p{line-height:1.6}
+    .muted{color:var(--muted)}
+    .nav{flex-wrap:wrap;justify-content:flex-start;margin:20px 0 28px}
+    .btn{display:inline-flex;justify-content:center;align-items:center;gap:7px;background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:650;transition:transform .18s,border-color .18s}
+    .btn:hover{transform:translateY(-2px);border-color:var(--purple)}
+    .btn.primary{background:var(--green);color:#171b11;border-color:transparent}
+    .btn.danger{color:#ffaaaa}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .card{background:linear-gradient(145deg,rgba(36,33,53,.96),rgba(25,23,37,.96));border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 12px 35px rgba(0,0,0,.12);animation:rise .45s ease both}
+    @keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+    .wide{grid-column:span 2}.full{margin-top:18px}
+    .number{font-size:32px;font-weight:850;margin:12px 0 4px}
+    .eyebrow{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.2px}
+    .quote{font-size:19px;line-height:1.65;margin:15px 0}
+    .quote-author{color:var(--green);font-size:13px}
+    .progress{height:9px;background:#383349;border-radius:20px;overflow:hidden;margin:14px 0 8px}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--green));transition:width .4s}
+    .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:16px}
+    .day{padding:12px 5px;text-align:center;background:#191725;border:1px solid var(--border);border-radius:12px}
+    .day.today{border:1px solid var(--green);background:rgba(182,243,107,.08)}
+    .day strong{display:block;font-size:12px;margin-bottom:9px}
+    .day span{display:block;font-size:21px;margin-bottom:8px}
+    .day small{color:var(--muted);font-size:10px;line-height:1.4;display:block}
+    .list{display:grid;gap:10px;margin-top:15px}
+    .item{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:12px;padding:13px}
+    .item small{color:var(--muted)}
+    .status{color:var(--green);font-size:12px}
+    .status.error{color:var(--red)}
+    footer{color:var(--muted);text-align:center;font-size:12px;margin-top:32px}
+    @media(max-width:760px){
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .wide{grid-column:span 2}.week{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+      .nav .btn{width:100%}
     }
-
-    .welcome-title {
-      font-size: clamp(36px, 8vw, 70px);
-      line-height: 1.08;
-      letter-spacing: -2.8px;
-      margin: 22px 0 14px;
-      font-weight: 850;
+    @media(max-width:430px){
+      .wrap{padding-top:20px}.grid{grid-template-columns:1fr}
+      .wide{grid-column:span 1}.week{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .card{padding:17px}.welcome-title{letter-spacing:-1.8px}
+      .welcome-mark{width:58px;height:58px;border-radius:18px}
+      .welcome-footer{font-size:9px}
     }
-
-    .welcome-title span {
-      color: var(--green);
-      display: block;
-    }
-
-    .welcome-subtitle {
-      color: var(--muted);
-      font-size: clamp(14px, 2.5vw, 17px);
-      margin: 0;
-    }
-
-    .welcome-divider {
-      height: 1px;
-      width: 64px;
-      margin: 35px auto 27px;
-      background: linear-gradient(90deg, transparent, var(--purple), transparent);
-    }
-
-    .welcome-quote {
-      font-size: clamp(17px, 3vw, 23px);
-      line-height: 1.65;
-      font-weight: 500;
-      max-width: 600px;
-      margin: 0 auto 14px;
-    }
-
-    .welcome-author {
-      color: var(--green);
-      font-size: 13px;
-      letter-spacing: .5px;
-    }
-
-    .enter-button {
-      margin: 38px auto 0;
-      width: min(260px, 100%);
-      min-height: 56px;
-      border: 0;
-      border-radius: 15px;
-      background: var(--green);
-      color: #171b11;
-      font-weight: 850;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      transition: transform .2s, box-shadow .2s, background .2s;
-      box-shadow: 0 8px 30px rgba(182,243,107,.12);
-    }
-
-    .enter-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 38px rgba(182,243,107,.22);
-      background: #c5ff83;
-    }
-
-    .enter-button:active { transform: scale(.98); }
-
-    .welcome-footer {
-      position: absolute;
-      bottom: 22px;
-      left: 15px;
-      right: 15px;
-      color: #777188;
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      text-align: center;
-    }
-
-    @keyframes welcomeIn {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* LOGIN */
-
-    .login {
-      width: min(420px, 92%);
-      margin: 10vh auto;
-    }
-
-    .login input {
-      width: 100%;
-      padding: 13px;
-      margin: 7px 0 12px;
-      color: var(--text);
-      background: #12111b;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-
-    .login .btn {
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    /* PAINEL */
-
-    .wrap {
-      width: min(1120px, 92%);
-      margin: auto;
-      padding: 28px 0 50px;
-    }
-
-    .top, .row, .nav, .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .top { margin-bottom: 24px; flex-wrap: wrap; }
-
-    .brand {
-      font-size: 13px;
-      letter-spacing: 2px;
-      color: var(--green);
-      font-weight: 800;
-    }
-
-    h1 {
-      margin: 6px 0;
-      font-size: clamp(28px, 5vw, 42px);
-      letter-spacing: -1px;
-    }
-
-    h2 { font-size: 19px; margin: 0; }
-    h3 { margin: 0 0 8px; font-size: 16px; }
-    p { line-height: 1.6; }
-    .muted { color: var(--muted); }
-
-    .nav {
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      margin: 20px 0 28px;
-    }
-
-    .btn {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      gap: 7px;
-      background: var(--panel2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 11px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 650;
-      transition: transform .18s, border-color .18s;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      border-color: var(--purple);
-    }
-
-    .btn.primary {
-      background: var(--green);
-      color: #171b11;
-      border-color: transparent;
-    }
-
-    .btn.danger { color: #ffaaaa; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: linear-gradient(145deg, rgba(36,33,53,.96), rgba(25,23,37,.96));
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 12px 35px rgba(0,0,0,.12);
-      animation: rise .45s ease both;
-    }
-
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(9px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .wide { grid-column: span 2; }
-    .full { margin-top: 18px; }
-    .number { font-size: 32px; font-weight: 850; margin: 12px 0 4px; }
-
-    .eyebrow {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
-
-    .quote { font-size: 19px; line-height: 1.65; margin: 15px 0; }
-    .quote-author { color: var(--green); font-size: 13px; }
-
-    .progress {
-      height: 9px;
-      background: #383349;
-      border-radius: 20px;
-      overflow: hidden;
-      margin: 14px 0 8px;
-    }
-
-    .progress > div {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg,var(--purple),var(--green));
-      transition: width .4s;
-    }
-
-    .week {
-      display: grid;
-      grid-template-columns: repeat(7,minmax(0,1fr));
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .day {
-      padding: 12px 5px;
-      text-align: center;
-      background: #191725;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-
-    .day.today {
-      border: 1px solid var(--green);
-      background: rgba(182,243,107,.08);
-    }
-
-    .day strong { display: block; font-size: 12px; margin-bottom: 9px; }
-    .day span { display: block; font-size: 21px; margin-bottom: 8px; }
-
-    .day small {
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.4;
-      display: block;
-    }
-
-    .list { display: grid; gap: 10px; margin-top: 15px; }
-
-    .item {
-      background: rgba(255,255,255,.035);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 13px;
-    }
-
-    .item small { color: var(--muted); }
-    .status { color: var(--green); font-size: 12px; }
-    .status.error { color: var(--red); }
-
-    footer {
-      color: var(--muted);
-      text-align: center;
-      font-size: 12px;
-      margin-top: 32px;
-    }
-
-    @media (max-width: 760px) {
-      .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .wide { grid-column: span 2; }
-      .week { grid-template-columns: repeat(4,minmax(0,1fr)); }
-      .nav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .nav .btn { width: 100%; }
-    }
-
-    @media (max-width: 430px) {
-      .wrap { padding-top: 20px; }
-      .grid { grid-template-columns: 1fr; }
-      .wide { grid-column: span 1; }
-      .week { grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .card { padding: 17px; }
-      .welcome-title { letter-spacing: -1.8px; }
-      .welcome-mark { width: 58px; height: 58px; border-radius: 18px; }
-      .welcome-footer { font-size: 9px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-        scroll-behavior: auto !important;
-      }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
     }
   </style>
 </head>
-
 <body>
-
-  <!-- CAPA DE ENTRADA -->
   <section id="welcomeScreen" class="welcome-screen">
     <div class="welcome-content">
       <div class="welcome-mark" aria-hidden="true">✦</div>
-
       <div class="welcome-label">Meu sistema pessoal</div>
-
-      <h1 class="welcome-title">
-        Bem-vindo,
-        <span>Henrique.</span>
-      </h1>
-
-      <p class="welcome-subtitle">
-        Sua evolução começa com a decisão de continuar.
-      </p>
-
+      <h1 class="welcome-title">Bem-vindo,<span>Henrique.</span></h1>
+      <p class="welcome-subtitle">Sua evolução começa com a decisão de continuar.</p>
       <div class="welcome-divider"></div>
-
       <p id="welcomeQuote" class="welcome-quote"></p>
       <div id="welcomeAuthor" class="welcome-author"></div>
-
-      <button id="enterButton" class="enter-button" type="button">
-        ENTRAR <span aria-hidden="true">→</span>
-      </button>
+      <button id="enterButton" class="enter-button" type="button">ENTRAR <span aria-hidden="true">→</span></button>
     </div>
-
-    <div class="welcome-footer">
-      DISCIPLINA · CONSTÂNCIA · EVOLUÇÃO
-    </div>
+    <div class="welcome-footer">DISCIPLINA · CONSTÂNCIA · EVOLUÇÃO</div>
   </section>
 
-  <!-- LOGIN: SÓ APARECE SE NÃO HOUVER SESSÃO ATIVA -->
   <section id="loginScreen" class="login card hidden">
     <div class="brand">MEU TREINO · ÁREA PRIVADA</div>
     <h1>Bem-vindo de volta.</h1>
     <p class="muted">Entre para acessar seu painel pessoal.</p>
-
     <form id="loginForm">
       <label for="email">E-mail</label>
       <input id="email" type="email" autocomplete="email" required placeholder="seu@email.com">
-
       <label for="password">Senha</label>
       <input id="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
-
       <button class="btn primary" type="submit">Entrar na conta</button>
     </form>
-
     <button id="signupButton" class="btn" type="button">Criar conta</button>
     <button id="backToWelcome" class="btn" type="button">← Voltar à capa</button>
     <p id="loginMessage" class="muted" role="status"></p>
   </section>
 
-  <!-- PAINEL PRINCIPAL -->
   <main id="dashboard" class="wrap hidden">
     <header class="top">
       <div>
@@ -461,10 +156,8 @@
         <h1>Meu painel.</h1>
         <p id="todayLabel" class="muted"></p>
       </div>
-
       <button id="logoutButton" class="btn danger" type="button">Sair ↗</button>
     </header>
-
     <nav class="nav" aria-label="Navegação principal">
       <a href="treino.html" class="btn primary">💪 Meu treino</a>
       <a href="corridas.html" class="btn">🏃 Corridas</a>
@@ -474,37 +167,28 @@
       <a href="rotina.html" class="btn">🌱 Rotina</a>
       <button id="refreshButton" class="btn" type="button">↻ Atualizar</button>
     </nav>
-
     <section class="grid">
       <article class="card wide">
         <div class="eyebrow">Princípio do dia</div>
         <p id="dailyQuote" class="quote"></p>
         <div id="quoteAuthor" class="quote-author"></div>
       </article>
-
       <article class="card">
         <div class="eyebrow">Treinos registrados</div>
         <div id="workoutCount" class="number">—</div>
         <div class="muted">Registros no seu histórico</div>
       </article>
-
       <article class="card">
         <div class="eyebrow">Corridas registradas</div>
         <div id="raceCount" class="number">—</div>
         <div class="muted">Atividades de corrida</div>
       </article>
-
       <article class="card wide">
-        <div class="section-head">
-          <h2>Seu plano semanal</h2>
-          <span class="eyebrow">Visão geral</span>
-        </div>
-
+        <div class="section-head"><h2>Seu plano semanal</h2><span class="eyebrow">Visão geral</span></div>
         <div id="weekGrid" class="week"></div>
         <div class="progress"><div id="weekProgress"></div></div>
         <p id="weekSummary" class="muted">Carregando seu progresso...</p>
       </article>
-
       <article class="card">
         <div class="eyebrow">Consistência</div>
         <div id="weekWorkoutCount" class="number">—</div>
@@ -512,18 +196,10 @@
         <a href="evolucao.html" class="btn" style="margin-top:16px">Ver evolução →</a>
       </article>
     </section>
-
     <section class="card full">
-      <div class="section-head">
-        <h2>Atividade recente</h2>
-        <span id="syncStatus" class="status">Conectando...</span>
-      </div>
-
-      <div id="recentList" class="list">
-        <div class="item muted">Carregando seu histórico...</div>
-      </div>
+      <div class="section-head"><h2>Atividade recente</h2><span id="syncStatus" class="status">Conectando...</span></div>
+      <div id="recentList" class="list"><div class="item muted">Carregando seu histórico...</div></div>
     </section>
-
     <footer>Disciplina todos os dias. Progresso construído com consistência.</footer>
   </main>
 
@@ -531,465 +207,245 @@
     const SUPABASE_URL = "https://uukryfijipouzukeelmg.supabase.co";
     const SUPABASE_KEY = "sb_publishable_u0CoWXKf4dToj-65NtQhtA_7l2ZP9wX";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     const $ = (id) => document.getElementById(id);
-
     let currentUser = null;
     let sessionUser = null;
 
-    // A frase da capa muda a cada novo carregamento do site.
+    // Frases da capa: uma escolha aleatória a cada abertura.
     const frasesCapa = [
-      {
-        texto: "We suffer more often in imagination than in reality.",
-        autor: "Sêneca · Cartas a Lucílio"
-      },
-      {
-        texto: "The happiness of your life depends upon the quality of your thoughts.",
-        autor: "Marco Aurélio · Meditações"
-      },
-      {
-        texto: "First say to yourself what you would be; and then do what you have to do.",
-        autor: "Epicteto · Manual"
-      },
-      {
-        texto: "The impediment to action advances action. What stands in the way becomes the way.",
-        autor: "Marco Aurélio · Meditações"
-      },
-      {
-        texto: "Difficulties strengthen the mind, as labor does the body.",
-        autor: "Sêneca · Sobre a Providência"
-      },
-      {
-        texto: "It is not that we have a short time to live, but that we waste much of it.",
-        autor: "Sêneca · Sobre a brevidade da vida"
-      },
-      {
-        texto: "If you want to improve, be content to be thought foolish and stupid.",
-        autor: "Epicteto · Manual"
-      },
-      {
-        texto: "No man is free who is not master of himself.",
-        autor: "Epicteto"
-      },
-      {
-        texto: "Waste no more time arguing what a good man should be. Be one.",
-        autor: "Marco Aurélio · Meditações"
-      },
-      {
-        texto: "He who has a why to live can bear almost any how.",
-        autor: "Friedrich Nietzsche"
-      },
-      {
-        texto: "It always seems impossible until it's done.",
-        autor: "Frase popularmente atribuída a Nelson Mandela"
-      },
-      {
-        texto: "Great things are done by a series of small things brought together.",
-        autor: "Vincent van Gogh"
-      }
+      {texto:"Sofremos mais frequentemente na imaginação do que na realidade.",autor:"Sêneca · Cartas a Lucílio"},
+      {texto:"A felicidade da sua vida depende da qualidade dos seus pensamentos.",autor:"Marco Aurélio · Meditações"},
+      {texto:"Primeiro, diga a si mesmo quem você quer ser; depois, faça o que precisa fazer.",autor:"Epicteto · Manual"},
+      {texto:"O obstáculo à ação impulsiona a ação. O que está no caminho torna-se o caminho.",autor:"Marco Aurélio · Meditações"},
+      {texto:"As dificuldades fortalecem a mente, assim como o trabalho fortalece o corpo.",autor:"Sêneca · Sobre a Providência"},
+      {texto:"Não é que tenhamos pouco tempo para viver, mas desperdiçamos muito dele.",autor:"Sêneca · Sobre a brevidade da vida"},
+      {texto:"Se quiser melhorar, aceite ser considerado tolo e ignorante.",autor:"Epicteto · Manual"},
+      {texto:"Ninguém é livre se não for senhor de si mesmo.",autor:"Epicteto"},
+      {texto:"Pare de discutir como um homem bom deveria ser. Seja um.",autor:"Marco Aurélio · Meditações"},
+      {texto:"Quem tem um porquê para viver pode suportar quase qualquer como.",autor:"Friedrich Nietzsche · atribuição comum"},
+      {texto:"Sempre parece impossível até que seja feito.",autor:"Frase popularmente atribuída a Nelson Mandela"},
+      {texto:"Grandes coisas são feitas de uma série de pequenas coisas reunidas.",autor:"Vincent van Gogh"}
     ];
 
-    function chooseWelcomeQuote() {
-      let previousIndex = -1;
-
-      try {
-        previousIndex = Number(sessionStorage.getItem("meuTreinoLastQuote"));
-      } catch (error) {
-        previousIndex = -1;
+    function chooseWelcomeQuote(){
+      let previousIndex=-1;
+      try{
+        const saved=sessionStorage.getItem("meuTreinoLastQuote");
+        previousIndex=saved===null?-1:Number(saved);
+      }catch(error){}
+      let nextIndex=Math.floor(Math.random()*frasesCapa.length);
+      if(frasesCapa.length>1){
+        while(nextIndex===previousIndex) nextIndex=Math.floor(Math.random()*frasesCapa.length);
       }
-
-      let nextIndex;
-
-      if (frasesCapa.length > 1) {
-        do {
-          nextIndex = Math.floor(Math.random() * frasesCapa.length);
-        } while (nextIndex === previousIndex);
-      } else {
-        nextIndex = 0;
-      }
-
-      try {
-        sessionStorage.setItem("meuTreinoLastQuote", String(nextIndex));
-      } catch (error) {
-        // A página continua funcionando mesmo se o navegador bloquear o armazenamento.
-      }
-
-      $("welcomeQuote").textContent = `“${frasesCapa[nextIndex].texto}”`;
-      $("welcomeAuthor").textContent = `— ${frasesCapa[nextIndex].autor}`;
+      try{sessionStorage.setItem("meuTreinoLastQuote",String(nextIndex));}catch(error){}
+      $("welcomeQuote").textContent=`“${frasesCapa[nextIndex].texto}”`;
+      $("welcomeAuthor").textContent=`— ${frasesCapa[nextIndex].autor}`;
     }
 
+    // Frase do painel: muda conforme o dia da semana.
     const frasesSemana = {
-      0: {
-        texto: "We suffer more often in imagination than in reality.",
-        autor: "Seneca · Letters to Lucilius, 13"
-      },
-      1: {
-        texto: "First say to yourself what you would be; and then do what you have to do.",
-        autor: "Epictetus · Enchiridion, 3"
-      },
-      2: {
-        texto: "The impediment to action advances action. What stands in the way becomes the way.",
-        autor: "Marcus Aurelius · Meditations, 5.20"
-      },
-      3: {
-        texto: "Difficulties strengthen the mind, as labor does the body.",
-        autor: "Seneca · On Providence"
-      },
-      4: {
-        texto: "If you want to improve, be content to be thought foolish and stupid.",
-        autor: "Epictetus · Enchiridion, 13"
-      },
-      5: {
-        texto: "It is not that we have a short time to live, but that we waste much of it.",
-        autor: "Seneca · On the Shortness of Life, 1.3"
-      },
-      6: {
-        texto: "The happiness of your life depends upon the quality of your thoughts.",
-        autor: "Marcus Aurelius · Meditations, 5.16"
-      }
+      0:{texto:"Sofremos mais frequentemente na imaginação do que na realidade.",autor:"Sêneca · Cartas a Lucílio, 13"},
+      1:{texto:"Primeiro, diga a si mesmo quem você quer ser; depois, faça o que precisa fazer.",autor:"Epicteto · Manual, 3"},
+      2:{texto:"O obstáculo à ação impulsiona a ação. O que está no caminho torna-se o caminho.",autor:"Marco Aurélio · Meditações, 5.20"},
+      3:{texto:"As dificuldades fortalecem a mente, assim como o trabalho fortalece o corpo.",autor:"Sêneca · Sobre a Providência"},
+      4:{texto:"Se quiser melhorar, aceite ser considerado tolo e ignorante.",autor:"Epicteto · Manual, 13"},
+      5:{texto:"Não é que tenhamos pouco tempo para viver, mas desperdiçamos muito dele.",autor:"Sêneca · Sobre a brevidade da vida, 1.3"},
+      6:{texto:"A felicidade da sua vida depende da qualidade dos seus pensamentos.",autor:"Marco Aurélio · Meditações, 5.16"}
     };
 
     const planoSemanal = {
-      0: { nome: "Descanso", emoji: "😴", descanso: true },
-      1: { nome: "Superiores A + Core", emoji: "💪" },
-      2: { nome: "Joelho + Pernas", emoji: "🦵" },
-      3: { nome: "Ativo + Mobilidade", emoji: "🧘" },
-      4: { nome: "Superiores B + Core", emoji: "💪" },
-      5: { nome: "Pernas + Glúteos", emoji: "🦵" },
-      6: { nome: "Condicionamento + Corpo inteiro", emoji: "🏃" }
+      0:{nome:"Descanso",emoji:"😴",descanso:true},
+      1:{nome:"Superiores A + Core",emoji:"💪"},
+      2:{nome:"Joelho + Pernas",emoji:"🦵"},
+      3:{nome:"Ativo + Mobilidade",emoji:"🧘"},
+      4:{nome:"Superiores B + Core",emoji:"💪"},
+      5:{nome:"Pernas + Glúteos",emoji:"🦵"},
+      6:{nome:"Condicionamento + Corpo inteiro",emoji:"🏃"}
     };
 
-    function dateLocal(date = new Date()) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
+    function dateLocal(date=new Date()){
+      const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,"0"),d=String(date.getDate()).padStart(2,"0");
       return `${y}-${m}-${d}`;
     }
-
-    function escapeHtml(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      }[char]));
+    function escapeHtml(value){
+      return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
     }
-
-    function formatDate(value) {
-      if (!value) return "Data não informada";
-
-      const date = new Date(`${value}T12:00:00`);
-
-      return Number.isNaN(date.getTime())
-        ? escapeHtml(value)
-        : date.toLocaleDateString("pt-BR");
+    function formatDate(value){
+      if(!value)return "Data não informada";
+      const date=new Date(`${value}T12:00:00`);
+      return Number.isNaN(date.getTime())?escapeHtml(value):date.toLocaleDateString("pt-BR");
     }
-
-    function showWelcome() {
+    function showWelcome(){
       $("welcomeScreen").classList.remove("hidden");
       $("loginScreen").classList.add("hidden");
       $("dashboard").classList.add("hidden");
     }
-
-    function showLogin(message = "") {
+    function showLogin(message=""){
       $("welcomeScreen").classList.add("hidden");
       $("loginScreen").classList.remove("hidden");
       $("dashboard").classList.add("hidden");
-      $("loginMessage").textContent = message;
+      $("loginMessage").textContent=message;
     }
 
-    async function handleEnter() {
-      $("enterButton").disabled = true;
-      $("enterButton").innerHTML = "ABRINDO...";
-
-      try {
-        const { data, error } = await supabaseClient.auth.getSession();
-
-        if (error) throw error;
-
-        if (data.session?.user) {
-          sessionUser = data.session.user;
+    async function handleEnter(){
+      $("enterButton").disabled=true;
+      $("enterButton").textContent="ABRINDO...";
+      try{
+        const {data,error}=await supabaseClient.auth.getSession();
+        if(error)throw error;
+        if(data.session?.user){
+          sessionUser=data.session.user;
           await enterDashboard(sessionUser);
-        } else {
-          showLogin();
-        }
-      } catch (error) {
+        }else showLogin();
+      }catch(error){
         console.error(error);
         showLogin("Não foi possível verificar sua sessão. Entre com sua conta.");
-      } finally {
-        $("enterButton").disabled = false;
-        $("enterButton").innerHTML = 'ENTRAR <span aria-hidden="true">→</span>';
+      }finally{
+        $("enterButton").disabled=false;
+        $("enterButton").innerHTML='ENTRAR <span aria-hidden="true">→</span>';
       }
     }
 
-    async function enterDashboard(user) {
-      currentUser = user;
-      sessionUser = user;
-
+    async function enterDashboard(user){
+      currentUser=user;
+      sessionUser=user;
       $("welcomeScreen").classList.add("hidden");
       $("loginScreen").classList.add("hidden");
       $("dashboard").classList.remove("hidden");
-
-      const now = new Date();
-
-      $("todayLabel").textContent = now.toLocaleDateString("pt-BR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      });
-
-      const quote = frasesSemana[now.getDay()];
-      $("dailyQuote").textContent = `“${quote.texto}”`;
-      $("quoteAuthor").textContent = `— ${quote.autor}`;
-
+      const now=new Date();
+      $("todayLabel").textContent=now.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+      const quote=frasesSemana[now.getDay()];
+      $("dailyQuote").textContent=`“${quote.texto}”`;
+      $("quoteAuthor").textContent=`— ${quote.autor}`;
       renderWeek([]);
       await refreshDashboard();
     }
 
-    function renderWeek(records) {
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(today);
-
-      monday.setDate(today.getDate() + mondayOffset);
-
-      const dates = [];
-
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        dates.push(d);
-      }
-
-      const dayNames = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
-      const recordsByDate = new Set(records.map((r) => r.data).filter(Boolean));
-
-      let plannedCount = 0;
-      let doneCount = 0;
-
-      $("weekGrid").innerHTML = dates.map((date, index) => {
-        const jsDay = date.getDay();
-        const plan = planoSemanal[jsDay];
-        const key = dateLocal(date);
-        const isToday = key === dateLocal();
-        const hasRecord = recordsByDate.has(key);
-
-        if (!plan.descanso) {
-          plannedCount++;
-          if (hasRecord) doneCount++;
-        }
-
-        return `<div class="day ${isToday ? "today" : ""}">
-          <strong>${dayNames[index]}</strong>
-          <span>${plan.emoji}</span>
+    function renderWeek(records){
+      const today=new Date(),dayOfWeek=today.getDay();
+      const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+      const monday=new Date(today);
+      monday.setDate(today.getDate()+mondayOffset);
+      const dates=[];
+      for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);dates.push(d);}
+      const dayNames=["SEG","TER","QUA","QUI","SEX","SÁB","DOM"];
+      const recordsByDate=new Set(records.map(r=>r.data).filter(Boolean));
+      let plannedCount=0,doneCount=0;
+      $("weekGrid").innerHTML=dates.map((date,index)=>{
+        const plan=planoSemanal[date.getDay()],key=dateLocal(date);
+        const isToday=key===dateLocal(),hasRecord=recordsByDate.has(key);
+        if(!plan.descanso){plannedCount++;if(hasRecord)doneCount++;}
+        return `<div class="day ${isToday?"today":""}">
+          <strong>${dayNames[index]}</strong><span>${plan.emoji}</span>
           <small>${escapeHtml(plan.nome)}</small>
-          <small style="margin-top:7px;color:${hasRecord ? "var(--green)" : "var(--muted)"}">
-            ${hasRecord ? "● Registrado" : (plan.descanso ? "Recuperação" : "Planejado")}
-          </small>
+          <small style="margin-top:7px;color:${hasRecord?"var(--green)":"var(--muted)"}">
+          ${hasRecord?"● Registrado":(plan.descanso?"Recuperação":"Planejado")}</small>
         </div>`;
       }).join("");
-
-      const percent = plannedCount ? Math.round(doneCount / plannedCount * 100) : 0;
-
-      $("weekProgress").style.width = `${percent}%`;
-      $("weekSummary").textContent =
-        `${doneCount} de ${plannedCount} dias de treino com registro nesta semana (${percent}%).`;
-      $("weekWorkoutCount").textContent = doneCount;
+      const percent=plannedCount?Math.round(doneCount/plannedCount*100):0;
+      $("weekProgress").style.width=`${percent}%`;
+      $("weekSummary").textContent=`${doneCount} de ${plannedCount} dias de treino com registro nesta semana (${percent}%).`;
+      $("weekWorkoutCount").textContent=doneCount;
     }
 
-    async function refreshDashboard() {
-      if (!currentUser) return;
-
-      $("syncStatus").textContent = "Atualizando...";
-      $("syncStatus").className = "status";
-
-      try {
-        const [workoutsResult, racesResult] = await Promise.all([
-          supabaseClient.from("Treinos").select("*").eq("user_id", currentUser.id),
-          supabaseClient.from("Corridas").select("*").eq("user_id", currentUser.id)
+    async function refreshDashboard(){
+      if(!currentUser)return;
+      $("syncStatus").textContent="Atualizando...";
+      $("syncStatus").className="status";
+      try{
+        const [workoutsResult,racesResult]=await Promise.all([
+          supabaseClient.from("Treinos").select("*").eq("user_id",currentUser.id),
+          supabaseClient.from("Corridas").select("*").eq("user_id",currentUser.id)
         ]);
-
-        if (workoutsResult.error) throw workoutsResult.error;
-        if (racesResult.error) throw racesResult.error;
-
-        const workouts = workoutsResult.data || [];
-        const races = racesResult.data || [];
-
-        $("workoutCount").textContent = workouts.length;
-        $("raceCount").textContent = races.length;
-
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const monday = new Date(today);
-
-        monday.setDate(today.getDate() + mondayOffset);
-
-        const mondayKey = dateLocal(monday);
-        const todayKey = dateLocal();
-
-        const thisWeek = workouts.filter((item) =>
-          item.data && item.data >= mondayKey && item.data <= todayKey
-        );
-
+        if(workoutsResult.error)throw workoutsResult.error;
+        if(racesResult.error)throw racesResult.error;
+        const workouts=workoutsResult.data||[],races=racesResult.data||[];
+        $("workoutCount").textContent=workouts.length;
+        $("raceCount").textContent=races.length;
+        const today=new Date(),dayOfWeek=today.getDay();
+        const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+        const monday=new Date(today);
+        monday.setDate(today.getDate()+mondayOffset);
+        const mondayKey=dateLocal(monday),todayKey=dateLocal();
+        const thisWeek=workouts.filter(item=>item.data&&item.data>=mondayKey&&item.data<=todayKey);
         renderWeek(thisWeek);
-
-        const allItems = [
-          ...workouts.map((item) => ({
-            type: "💪 Treino",
-            title: item.dia || item.nome || item.treino || "Treino registrado",
-            date: item.data,
-            extra: item.duracao
-              ? `${item.duracao} min`
-              : (item.rpe != null ? `RPE ${item.rpe}` : "")
+        const allItems=[
+          ...workouts.map(item=>({
+            type:"💪 Treino",
+            title:item.dia||item.nome||item.treino||"Treino registrado",
+            date:item.data,
+            extra:item.duracao?`${item.duracao} min`:(item.rpe!=null?`Esforço percebido: ${item.rpe}/10`:"")
           })),
-          ...races.map((item) => ({
-            type: "🏃 Corrida",
-            title: item.nome || item.prova || item.distancia || "Corrida registrada",
-            date: item.data,
-            extra: item.tempo || item.duracao || ""
+          ...races.map(item=>({
+            type:"🏃 Corrida",
+            title:item.nome||item.prova||item.distancia||"Corrida registrada",
+            date:item.data,extra:item.tempo||item.duracao||""
           }))
-        ]
-          .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
-          .slice(0, 8);
-
-        $("recentList").innerHTML = allItems.length
-          ? allItems.map((item) => `<div class="item">
-              <div class="row">
-                <strong>${item.type} · ${escapeHtml(item.title)}</strong>
-                <small>${formatDate(item.date)}</small>
-              </div>
-              ${item.extra ? `<small>${escapeHtml(item.extra)}</small>` : ""}
-            </div>`).join("")
-          : `<div class="item muted">Ainda não há registros para exibir. Quando você registrar treinos ou corridas, eles aparecerão aqui.</div>`;
-
-        $("syncStatus").textContent = "Sincronizado";
-      } catch (error) {
+        ].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0,8);
+        $("recentList").innerHTML=allItems.length
+          ?allItems.map(item=>`<div class="item"><div class="row">
+              <strong>${item.type} · ${escapeHtml(item.title)}</strong>
+              <small>${formatDate(item.date)}</small></div>
+              ${item.extra?`<small>${escapeHtml(item.extra)}</small>`:""}</div>`).join("")
+          :`<div class="item muted">Ainda não há registros para exibir. Quando você registrar treinos ou corridas, eles aparecerão aqui.</div>`;
+        $("syncStatus").textContent="Sincronizado";
+      }catch(error){
         console.error(error);
-
-        $("syncStatus").textContent = "Erro ao carregar";
-        $("syncStatus").className = "status error";
-
-        $("recentList").innerHTML = `<div class="item">
-          Não consegui carregar os dados. Confira se as tabelas "Treinos" e "Corridas" existem e se as políticas RLS permitem que sua conta leia os próprios registros.
-        </div>`;
+        $("syncStatus").textContent="Erro ao carregar";
+        $("syncStatus").className="status error";
+        $("recentList").innerHTML=`<div class="item">Não consegui carregar os dados. Confira se as tabelas "Treinos" e "Corridas" existem e se as políticas de segurança permitem que sua conta leia os próprios registros.</div>`;
       }
     }
 
-    // Capa -> painel ou login, dependendo da sessão.
-    $("enterButton").addEventListener("click", handleEnter);
+    $("enterButton").addEventListener("click",handleEnter);
+    $("backToWelcome").addEventListener("click",showWelcome);
 
-    $("backToWelcome").addEventListener("click", showWelcome);
-
-    $("loginForm").addEventListener("submit", async (event) => {
+    $("loginForm").addEventListener("submit",async event=>{
       event.preventDefault();
-
-      $("loginMessage").textContent = "Entrando...";
-
-      const email = $("email").value.trim();
-      const password = $("password").value;
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        $("loginMessage").textContent = error.message;
-        return;
-      }
-
+      $("loginMessage").textContent="Entrando...";
+      const email=$("email").value.trim(),password=$("password").value;
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error){$("loginMessage").textContent=error.message;return;}
       await enterDashboard(data.user);
     });
 
-    $("signupButton").addEventListener("click", async () => {
-      const email = $("email").value.trim();
-      const password = $("password").value;
+    $("signupButton").addEventListener("click",async()=>{
+      const email=$("email").value.trim(),password=$("password").value;
+      if(!email||!password){$("loginMessage").textContent="Preencha o e-mail e a senha antes de criar a conta.";return;}
+      if(password.length<6){$("loginMessage").textContent="Use uma senha com pelo menos 6 caracteres.";return;}
+      $("loginMessage").textContent="Criando conta...";
+      const {data,error}=await supabaseClient.auth.signUp({email,password});
+      if(error){$("loginMessage").textContent=error.message;return;}
+      if(data.session&&data.user)await enterDashboard(data.user);
+      else $("loginMessage").textContent="Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre.";
+    });
 
-      if (!email || !password) {
-        $("loginMessage").textContent = "Preencha o e-mail e a senha antes de criar a conta.";
-        return;
+    $("logoutButton").addEventListener("click",async()=>{
+      const {error}=await supabaseClient.auth.signOut();
+      if(error){console.error(error);showLogin("Não foi possível encerrar a sessão. Tente novamente.");return;}
+      currentUser=null;sessionUser=null;showWelcome();
+    });
+
+    $("refreshButton").addEventListener("click",refreshDashboard);
+
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      if(event==="SIGNED_IN"&&session?.user){
+        sessionUser=session.user;
+        if(!$("loginScreen").classList.contains("hidden"))enterDashboard(session.user);
       }
-
-      if (password.length < 6) {
-        $("loginMessage").textContent = "Use uma senha com pelo menos 6 caracteres.";
-        return;
-      }
-
-      $("loginMessage").textContent = "Criando conta...";
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password
-      });
-
-      if (error) {
-        $("loginMessage").textContent = error.message;
-        return;
-      }
-
-      if (data.session && data.user) {
-        await enterDashboard(data.user);
-      } else {
-        $("loginMessage").textContent =
-          "Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre.";
+      if(event==="SIGNED_OUT"){
+        currentUser=null;sessionUser=null;showWelcome();
       }
     });
 
-    $("logoutButton").addEventListener("click", async () => {
-      const { error } = await supabaseClient.auth.signOut();
-
-      if (error) {
-        console.error(error);
-        showLogin("Não foi possível encerrar a sessão. Tente novamente.");
-        return;
-      }
-
-      currentUser = null;
-      sessionUser = null;
-      showWelcome();
-    });
-
-    $("refreshButton").addEventListener("click", refreshDashboard);
-
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        sessionUser = session.user;
-
-        // Um login feito pelo formulário abre o painel.
-        if (!$("loginScreen").classList.contains("hidden")) {
-          enterDashboard(session.user);
-        }
-      }
-
-      if (event === "SIGNED_OUT") {
-        currentUser = null;
-        sessionUser = null;
-        showWelcome();
-      }
-    });
-
-    // Ao abrir ou atualizar o site, sempre mostrar a capa primeiro.
-    // A sessão existente fica preservada para o botão ENTRAR.
-    (async function init() {
+    (async function init(){
       chooseWelcomeQuote();
       showWelcome();
-
-      try {
-        const { data, error } = await supabaseClient.auth.getSession();
-
-        if (error) {
-          console.error("Não foi possível verificar a sessão:", error.message);
-          return;
-        }
-
-        sessionUser = data.session?.user || null;
-      } catch (error) {
-        console.error(error);
-      }
+      try{
+        const {data,error}=await supabaseClient.auth.getSession();
+        if(error){console.error("Não foi possível verificar a sessão:",error.message);return;}
+        sessionUser=data.session?.user||null;
+      }catch(error){console.error(error);}
     })();
   </script>
 </body>
